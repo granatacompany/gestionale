@@ -1,0 +1,469 @@
+/* ===== LAYOUT GENERALE DELLA PAGINA ===== */
+body {
+    margin: 0;                          /* elimina i margini di default del browser */
+    font-family: Arial, sans-serif;     /* font base dell'app */
+    background-color: #f4f4f4;          /* colore di sfondo generale */
+}
+
+/* ===== LOGIN ===== */
+.login-container {
+    width: 300px;                       /* larghezza box login */
+    margin: 120px auto;                 /* centra orizzontalmente e sposta in basso */
+    background: white;                  /* sfondo bianco */
+    padding: 20px;                      /* spazio interno */
+    border-radius: 10px;                /* angoli arrotondati */
+    box-shadow: 0 0 10px rgba(0,0,0,0.2); /* ombra */
+    text-align: center;                 /* centra il contenuto */
+}
+
+.login-container input {
+    width: 90%;                         /* larghezza input login */
+    margin: 10px 0;                     /* spazio sopra e sotto */
+    padding: 10px;                      /* altezza input */
+    border-radius: 8px;                 /* arrotondamento */
+    border: 2px solid #ddd;             /* bordo input */
+    transition: 0.2s;                   /* animazione morbida */
+}
+
+input:focus {
+    border-color: #0078d7;              /* bordo blu quando attivo */
+    outline: none;                      /* rimuove contorno browser */
+    background: #eef6ff;                /* sfondo chiaro */
+}
+
+.login-container button {
+    padding: 10px 20px;                 /* dimensione bottone */
+    background: #0078d7;                /* colore bottone */
+    color: white;                       /* colore testo */
+    border: none;                       /* rimuove bordo */
+    border-radius: 12px;                /* arrotondamento */
+    font-weight: bold;                  /* testo più visibile */
+    cursor: pointer;                    /* cursore mano */
+}
+
+.login-container button:hover {
+    background: #005fa3;                /* colore hover */
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: 200px;                       /* larghezza barra laterale */
+    background: #0078d7;                /* colore sidebar */
+    color: white;                       /* colore testo */
+    height: 100vh;                      /* altezza piena schermo */
+    position: fixed;                    /* fissa a sinistra */
+    padding-top: 20px;                  /* spazio sopra */
+}
+
+.sidebar h2 {
+    text-align: center;                 /* centra titolo */
+}
+
+.sidebar a {
+    display: block;                     /* ogni link su nuova riga */
+    color: white;                       /* colore testo */
+    text-decoration: none;              /* rimuove sottolineatura */
+    padding: 12px 20px;                 /* spazio cliccabile */
+}
+
+.sidebar a:hover {
+    background: #005fa3;                /* evidenzia hover */
+}
+
+/* ===== CONTENUTO PRINCIPALE ===== */
+.content {
+    margin-left: 240px;                 /* sposta contenuto fuori dalla sidebar */
+    padding: 20px;                      /* spazio interno */
+}
+
+/* ===== INPUT STANDARD GESTIONALE ===== */
+.input-gestionale {
+    width: 100%;                        /* occupa tutta la colonna */
+    padding: 12px;                      /* altezza campo */
+    border-radius: 8px;                 /* angoli morbidi */
+    border: 1px solid #ccc;             /* bordo neutro */
+    font-size: 16px;                    /* testo leggibile */
+    box-sizing: border-box;             /* include padding nella larghezza */
+}
+
+/* ===== FORM CLIENTI ===== */
+.form-container {
+    display: grid;                      /* attiva griglia */
+    grid-template-columns: 1fr 1fr 1fr; /* 3 colonne uguali */
+    row-gap: 20px;                      /* spazio verticale */
+    column-gap: 20px;                   /* spazio orizzontale */
+    max-width: 900px;                   /* larghezza massima form */
+    margin: 0 auto;                     /* centra orizzontalmente */
+}
+
+.form-container button {
+    grid-column: 1 / -1;                /* bottone largo quanto tutte le colonne */
+    width: 100%;                        /* riempie il form */
+    padding: 15px;                      /* altezza bottone */
+    background-color: #0078d7;          /* colore bottone */
+    color: white;                       /* testo bianco */
+    border: none;                       /* rimuove bordo */
+    border-radius: 8px;                 /* arrotondamento */
+    font-size: 16px;                    /* dimensione testo */
+    cursor: pointer;                    /* cursore mano */
+    margin-bottom: 1px;                /* spazio sotto bottone */
+}
+/* =========================================================
+   FIX: il bottone + NON deve occupare tutta la riga
+   ========================================================= */
+
+.form-container .btn-add-ricambio {
+    grid-column: auto !important;   /* annulla 1 / -1 */
+    width: auto !important;         /* annulla 100% */
+    justify-self: end;              /* resta a destra */
+}
+
+
+#btnElimina {
+    background: #d32f2f;   /* rosso base */
+}
+
+#btnElimina:hover {
+    background: #2b0202;   /* rosso più scuro */
+}
+
+
+.form-container button:hover {
+    background-color: #005fa3;          /* colore hover */
+}
+
+/* ===== CAMPO RICERCA ===== */
+#searchClienti {
+    max-width: 900px;                   /* stessa larghezza del form */
+    margin: 0 auto 20px auto;           /* centrato + spazio sotto */
+    display: block;                     /* comportamento da blocco */
+}
+
+/* ===== TABELLA CLIENTI ===== */
+table {
+    width: 100%;                        /* larghezza completa */
+    max-width: 900px;                   /* allineata al form */
+    margin: 0 auto;                     /* centra tabella */
+    border-collapse: collapse;          /* unisce i bordi */
+    background: white;                 /* sfondo tabella */
+    border-radius: 10px;                /* angoli arrotondati */
+    overflow: hidden;                   /* taglia angoli */
+    margin-top: 50px;                   /* spazio sopra tabella */
+}
+
+th {
+    background: #0078d7;                /* intestazione blu */
+    color: white;                       /* testo bianco */
+    padding: 12px;                      /* spazio interno */
+    text-align: left;                   /* allinea testo */
+}
+
+td {
+    padding: 10px;                      /* spazio celle */
+    border-bottom: 1px solid #ddd;      /* separatore righe */
+}
+
+tr:hover {
+    background: #f5faff;                /* evidenzia riga al passaggio */
+}
+/* ===== RIGA CLIENTE SELEZIONATA ===== */
+tr.selected {
+    background-color: #dbeafe;   /* evidenzia la riga selezionata */
+}
+/* ===== btn elimina ===== */
+#btnElimina:hover {
+    background: #b71c1c; /* rosso più scuro al passaggio */
+}
+#note {
+    grid-column: 1 / -1;   /* occupa tutte le colonne */
+    resize: vertical;      /* permette solo resize verticale */
+}
+/* ===============================
+   ORDINI
+   =============================== */
+
+#tabOrdini th {
+    text-align: center;        /* centra intestazioni */
+}
+
+#tabOrdini td {
+    text-align: center;        /* centra celle */
+}
+
+/* icone stato ordine */
+.stato-ordinato {
+    color: orange;             /* ordine in corso */
+}
+
+.stato-ritardo {
+    color: red;                /* ordine in ritardo */
+    font-weight: bold;
+}
+
+.stato-arrivato {
+    color: green;              /* ordine arrivato */
+}
+/* ===============================
+   CAMPI DATA CON LABEL
+   =============================== */
+
+.campo-data {
+    display: flex;              /* disposizione verticale */
+    flex-direction: column;
+    gap: 5px;                   /* spazio tra label e input */
+}
+
+.campo-data label {
+    font-size: 13px;            /* testo più piccolo */
+    color: #555;                /* grigio leggibile */
+}
+/* =========================================================
+   PREVENTIVI - LAYOUT FORM (solo pagina preventivi)
+   ========================================================= */
+
+.form-container.preventivi {                 /* serve a stilizzare SOLO il form preventivi */
+    display: grid;                           /* serve a creare griglia */
+    grid-template-columns: 1fr 1fr 1fr;      /* serve a creare 3 colonne */
+    row-gap: 20px;                           /* serve a dare spazio verticale */
+    column-gap: 20px;                        /* serve a dare spazio orizzontale */
+    max-width: 900px;                        /* serve a limitare la larghezza */
+    margin: 0 auto;                          /* serve a centrare il form */
+}
+
+/* =========================================================
+   TOGGLE PREVENTIVO RAPIDO
+   ========================================================= */
+
+.toggle-rapido {                             /* serve a dare stile al bottone toggle */
+    padding: 10px 18px;                      /* serve a dimensionare */
+    border-radius: 20px;                     /* serve a renderlo “toggle” */
+    border: 2px solid #0078d7;               /* serve a mettere bordo blu */
+    background: white;                       /* serve a stato OFF */
+    color: #0078d7;                          /* serve a testo blu */
+    font-weight: bold;                       /* serve a evidenziare testo */
+    cursor: pointer;                         /* serve a mostrare mano */
+    transition: 0.2s;                        /* serve a animazione */
+}
+
+.toggle-rapido.attivo {                      /* serve a stato ON */
+    background: #0078d7;                     /* serve a riempire blu */
+    color: white;                            /* serve a testo bianco */
+}
+
+/* =========================================================
+   PREVENTIVI - SEZIONE AVANZATA (toggle)
+   ========================================================= */
+
+.preventivo-avanzato {                       /* serve a contenere campi avanzati */
+    grid-column: 1 / -1;                     /* serve a farlo occupare tutte le colonne */
+    display: grid;                           /* serve a creare griglia interna */
+    grid-template-columns: 1fr 1fr 1fr;      /* serve a 3 colonne interne */
+    row-gap: 20px;                           /* serve a spazio verticale */
+    column-gap: 20px;                        /* serve a spazio orizzontale */
+}
+
+.preventivo-avanzato textarea {              /* serve a far occupare tutta la riga alla textarea */
+    grid-column: 1 / -1;                     /* serve a occupare tutte le colonne */
+}
+
+/* QUESTA È LA REGOLA CHE RENDE IL TOGGLE SICURO */
+.preventivo-avanzato.nascosto {              /* serve a nascondere i campi avanzati */
+    display: none !important;                /* serve a vincere su display:grid */
+}
+/* =========================================================
+   PREVENTIVI - RIGHE RICAMBIO (CORRETTE)
+   ========================================================= */
+
+.ricambi-wrapper {
+    grid-column: 1 / -1;              /* occupa tutta la riga del form */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;                        /* spazio tra righe ricambio */
+}
+
+.riga-ricambio {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 36px; /* descrizione | link | prezzo | + */
+    gap: 10px;
+    align-items: center;
+}
+
+/* =========================================================
+   PREVENTIVI - BOTTONE + RICAMBIO (QUADRATO)
+   ========================================================= */
+
+.btn-add-ricambio {
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;          /* quadratino, non tondo */
+    border: 2px solid #0078d7;
+    background: white;
+    color: #0078d7;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-add-ricambio:hover {
+    background: #0078d7;
+    color: white;
+}
+
+
+.btn-add-ricambio:hover {
+    background: #0078d7;
+    color: white;
+}
+
+/* =========================================================
+   PREVENTIVI - BOTTONE - RIMUOVI RICAMBIO
+   ========================================================= */
+
+.btn-remove-ricambio {
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    border: 2px solid #d32f2f;   /* rosso */
+    background: white;
+    color: #d32f2f;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-remove-ricambio:hover {
+    background: #d32f2f;
+    color: white;
+}
+
+/* il - NON deve essere largo come il bottone principale */
+.form-container .btn-remove-ricambio {
+    grid-column: auto !important;
+    width: auto !important;
+}
+/* =========================================================
+   PREVENTIVI - TOTALE AUTOMATICO BLOCCATO
+   ========================================================= */
+
+.input-gestionale.readonly {
+    background-color: #f0f0f0;   /* grigio chiaro */
+    cursor: not-allowed;         /* feedback visivo */
+}
+/* =========================================================
+   PREVIEW PREVENTIVO
+   ========================================================= */
+
+.preview-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.preview-box {
+    background: white;
+    padding: 20px;
+    width: 400px;
+    border-radius: 10px;
+}
+
+.preview-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+/* =========================================================
+   AUTOCOMPLETE CLIENTI - PREVENTIVI
+   ========================================================= */
+
+.autocomplete-container {
+    position: relative;
+   
+}
+
+.autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    z-index: 200;
+    display: none;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.autocomplete-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+    background-color: #f0f6ff;
+}
+/* =========================================================
+   PREVENTIVI - COLONNA ACCETTATO CENTRATA
+   ========================================================= */
+
+#tabPreventivi th:nth-child(4),
+#tabPreventivi td:nth-child(4) {
+    text-align: center;
+}
+/* =========================================================
+   PREVENTIVI - STATO STORICO
+   ========================================================= */
+
+.stato-accettato {
+    color: green;
+    font-weight: bold;
+}
+
+.stato-rifiutato {
+    color: red;
+    font-weight: bold;
+}
+.stato-ok {
+    color: green;
+    font-weight: bold;
+}
+
+.stato-ko {
+    color: red;
+    font-weight: bold;
+}
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 6px;
+}
+
+button:hover {
+    background-color: #45a049;
+}

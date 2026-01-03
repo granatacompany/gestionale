@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clienti</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>Spazioexe</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="clienti.html">Clienti</a>
+    <a href="magazzino.html" class="active">Magazzino</a>
+    <a href="preventivi.html">Preventivi</a>
+    <a href="riparazioni.html" class="active">Riparazioni</a>
+    <a href="ordini.html">Ordini</a>
+    
+</div>
+
+<div class="content">
+    <h1>Clienti</h1>
+
+    <!-- 🔍 RICERCA CLIENTI -->
+    <input
+        type="text"
+        id="searchClienti"
+        class="input-gestionale"
+        placeholder="Cerca cliente..."
+        onkeyup="filtraClienti()"
+        style="max-width:900px; margin-bottom:20px;"
+    >
+
+    <!-- FORM CLIENTE -->
+    <div class="form-container">
+
+        <input type="text" id="nome" class="input-gestionale" placeholder="Nome" onkeydown="nextField(event, 'cognome')">
+        <input type="text" id="cognome" class="input-gestionale" placeholder="Cognome" onkeydown="nextField(event, 'nascita')">
+        <input type="date" id="nascita" class="input-gestionale" onkeydown="nextField(event, 'telefono')">
+        <input type="tel" id="telefono" class="input-gestionale" placeholder="Telefono" onkeydown="nextField(event, 'indirizzo')">
+        <input type="text" id="indirizzo" class="input-gestionale" placeholder="Indirizzo" onkeydown="nextField(event, 'citta')">
+        <input type="text" id="citta" class="input-gestionale" placeholder="Città" onkeydown="nextField(event, 'btnCliente')">
+
+        <textarea
+            id="note"
+            class="input-gestionale"
+            placeholder="Note cliente"
+            rows="3"
+            style="grid-column:1/-1;"
+            onkeydown="nextField(event, 'btnCliente')"
+        ></textarea>
+
+        <button id="btnCliente" onclick="salvaCliente()">Registra cliente</button>
+        <button id="btnElimina" onclick="eliminaCliente()" style="display:none;">Elimina cliente</button>
+        <button id="btnStampa" onclick="stampaTessera()" style="display:none;">Stampa tessera</button>
+
+    </div>
+
+    <!-- TABELLA CLIENTI -->
+    <table id="tabClienti">
+        <thead>
+            <tr>
+                <th>Codice</th>
+                <th>Nome</th>
+                <th>Cognome</th>
+                <th>Nascita</th>
+                <th>Telefono</th>
+                <th>Indirizzo</th>
+                <th>Città</th>
+                <th>Punti</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script src="js/clienti.js"></script>
+</body>
+</html>

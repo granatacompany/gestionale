@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Ordini</title>
+
+    <!-- Foglio di stile principale -->
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- ==============================
+     SIDEBAR
+     ============================== -->
+<div class="sidebar">
+    <h2>Spazioexe</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="clienti.html">Clienti</a>
+    <a href="magazzino.html" class="active">Magazzino</a>
+    <a href="preventivi.html">Preventivi</a>
+    <a href="riparazioni.html" class="active">Riparazioni</a>
+    <a href="ordini.html">Ordini</a>
+    
+</div>
+
+<!-- ==============================
+     CONTENUTO PRINCIPALE
+     ============================== -->
+<div class="content">
+
+    <h1>Ordini ricambi</h1>
+
+    
+    </div>
+
+    <!-- ==============================
+         TABELLA ORDINI APERTI
+         ============================== -->
+
+    <h2>Ordini aperti</h2>
+
+    <table id="tabOrdini">
+        <thead>
+            <tr>
+            <th>ID</th>
+            <th>Preventivo</th>
+            <th>Ricambio</th>
+            <th>Link</th>
+            <th>Arrivato</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- righe generate via JavaScript -->
+        </tbody>
+    </table>
+
+</div>
+
+<!-- Script principale -->
+<script src="js/ordini.js"></script>
+
+</body>
+</html>

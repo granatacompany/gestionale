@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Preventivi - SpazioExe</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- =========================================================
+     SIDEBAR
+     ========================================================= -->
+<div class="sidebar">
+    <h2>SpazioExe</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="clienti.html">Clienti</a>
+    <a href="magazzino.html">Magazzino</a>
+    <a href="preventivi.html" class="active">Preventivi</a>
+    <a href="riparazioni.html">Riparazioni</a>
+    <a href="ordini.html">Ordini</a>
+</div>
+
+<!-- =========================================================
+     CONTENUTO
+     ========================================================= -->
+<div class="content">
+
+    <h1>Preventivi</h1>
+
+    <!-- =====================================================
+         TOGGLE PREVENTIVO RAPIDO
+         ===================================================== -->
+    <div style="margin-bottom: 20px;">
+        <button id="btnRapido" class="toggle-rapido">
+            Preventivo rapido
+        </button>
+    </div>
+
+    <!-- =====================================================
+         FORM PREVENTIVO
+         ===================================================== -->
+    <div class="form-container preventivi">
+
+        <!-- CLIENTE -->
+<div class="autocomplete-container">
+        <input
+             type="text"
+             id="prevCliente"
+             class="input-gestionale"
+             placeholder="Cerca cliente (nome, cognome, telefono)"
+             autocomplete="off"
+        >
+    <div id="autocompleteClienti" class="autocomplete-list"></div>
+</div>
+
+
+        <!-- DESCRIZIONE INTERVENTO -->
+            <textarea
+                id="prevDescrizione"
+                class="input-gestionale"
+                placeholder="Descrizione intervento"
+            ></textarea>
+            
+        
+            <!-- COSTI BASE -->
+        <input
+            type="number"
+            id="prevTotale"
+            class="input-gestionale"
+            placeholder="Totale €"
+        >
+
+        
+
+
+        <!-- =================================================
+             SEZIONE AVANZATA
+             ================================================= -->
+        <div id="sezioneAvanzata" class="preventivo-avanzato">
+
+            
+           <!-- =========================
+     RICAMBI (DINAMICI)
+     ========================= -->
+<div class="ricambi-wrapper" id="ricambiWrapper">
+
+    <!-- RIGA RICAMBIO 1 -->
+    <div class="riga-ricambio">
+        <input
+            type="text"
+            class="input-gestionale"
+            placeholder="Descrizione ricambio"
+        >
+        <input
+            type="url"
+            class="input-gestionale"
+            placeholder="Link ricambio"
+        >
+        <input
+            type="number"
+            class="input-gestionale"
+            placeholder="Prezzo €"
+        >
+        <div style="display:flex; flex-direction:column; gap:4px;">
+    <button
+        type="button"
+        class="btn-add-ricambio"
+        id="btnAddRicambio"
+        title="Aggiungi ricambio"
+    >+</button>
+
+</div>
+
+
+    </div>
+
+</div>
+
+            
+            <!-- ALTRI CAMPI AVANZATI -->
+            <input
+                type="number"
+                id="prevManodopera"
+                class="input-gestionale"
+                placeholder="Manodopera €"
+            >
+
+            <input
+                type="number"
+                id="prevSconto"
+                class="input-gestionale"
+                placeholder="Sconto €"
+            >
+
+            <input
+                type="number"
+                id="prevTempoStimato"
+                class="input-gestionale"
+                placeholder="Tempo stimato (minuti)"
+            >
+
+        </div>
+
+        <!-- AZIONE -->
+        <button id="btnSalvaPreventivo">
+            Salva preventivo
+        </button>
+
+    </div>
+
+    <!-- =====================================================
+         TABELLA PREVENTIVI Attivi
+         ===================================================== -->
+   <table id="tabPreventivi">
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Cliente</th>
+      <th>Descrizione</th>
+      <th>Ricambi</th>
+      <th>Totale</th>
+      <th>Tempo</th>
+      <th>Accettato</th>
+      
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+ <!-- =====================================================
+         TABELLA storico PREVENTIVI
+         ===================================================== -->
+<h2>Storico preventivi</h2>
+<table id="tabStoricoPreventivi">
+  <thead>
+    <tr>
+        <th>Data</th>
+        <th>Cliente</th>
+        <th>Descrizione</th>
+        <th>Ricambi</th>
+        <th>Totale</th>
+        <th>Tempo</th>
+        <th>Stato</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+</div>
+<td class="${classe}">${stato}</td>
+
+<div id="previewPreventivo" style="display:none" class="preview-overlay">
+  <div class="preview-box">
+
+    <h2>Anteprima preventivo</h2>
+
+    <p><strong>ID:</strong> <span id="pv-id"></span></p>
+    <p><strong>Cliente:</strong> <span id="pv-cliente"></span></p>
+    <p><strong>Descrizione:</strong></p>
+    <p id="pv-descrizione"></p>
+    <p><strong>Totale:</strong> € <span id="pv-totale"></span></p>
+
+    <div class="preview-actions">
+      <button type="button" id="pv-stampa">Stampa</button>
+      <button type="button" id="pv-whatsapp">WhatsApp</button>
+      <button type="button" id="pv-chiudi">Chiudi</button>
+    </div>
+
+  </div>
+</div>
+
+
+
+<script src="js/preventivi.js"></script>
+</body>
+</html>
