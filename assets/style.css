@@ -61,13 +61,24 @@ input:focus {
 
 .sidebar a {
     display: block;                     /* ogni link su nuova riga */
-    color: white;                       /* colore testo */
+    color: white;                      /* colore testo */
     text-decoration: none;              /* rimuove sottolineatura */
     padding: 12px 20px;                 /* spazio cliccabile */
 }
 
+.sidebar a.active {
+    background-color: white;
+    color: #0078d7;
+    border-radius: -6px;
+    font-weight: bold;
+}
+
 .sidebar a:hover {
     background: #005fa3;                /* evidenzia hover */
+}
+
+.sidebar a.active:hover {
+    background: whitesmoke;                /* evidenzia hover */
 }
 
 /* ===== CONTENUTO PRINCIPALE ===== */
@@ -449,10 +460,7 @@ tr.selected {
     color: red;
     font-weight: bold;
 }
-body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-}
+
 
 button {
     background-color: #4CAF50;
@@ -466,4 +474,13 @@ button {
 
 button:hover {
     background-color: #45a049;
+}
+
+#btnEliminaPreventivo {
+    background: #d32f2f;      /* rosso */
+    margin-top: 10px;
+}
+
+#btnEliminaPreventivo:hover {
+    background: #b71c1c;      /* rosso più scuro */
 }

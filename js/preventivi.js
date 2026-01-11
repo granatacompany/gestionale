@@ -48,7 +48,21 @@ function resetFormPreventivo() {
        --------------------------- */
        
     prevCliente.focus();
+
+    /* =========================
+      MODIFICA → BOTTONE salva  
+       ========================= */
+    const btn = document.getElementById("btnSalvaPreventivo");
+    btn.innerText = "Salva preventivo";
+    
+    /* ---------------------------
+        NASCONDE ELIMINA
+        --------------------------- */
+    document.getElementById("btnEliminaPreventivo").style.display = "none";
+
 }
+
+    
 
 /* =========================================================
    PREVENTIVI - TOGGLE RAPIDO
@@ -413,8 +427,15 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const id = salvaPreventivo();
-        apriPreviewPreventivo(id);
+        if (preventivoInModificaId) {
+    aggiornaPreventivo(preventivoInModificaId);
+} else {
+    const nuovoId = salvaPreventivo();
+    if (nuovoId) {
+        apriPreviewPreventivo(nuovoId);
+    }
+}
+
 
     });
 
@@ -515,15 +536,78 @@ function salvaPreventivo() {
     // aprire la preview
     // =========================
 
-   
+    apriPreviewPreventivo();
 
     // =========================
     // FINE
     // =========================
     console.log("Preventivo salvato:", nuovoPreventivo);
     return nuovoId;
+
+    
+    
 }
 
+/* =========================================================
+   PREVENTIVI - AGGIORNAMENTO PREVENTIVO ATTIVO
+   ========================================================= */
+
+function aggiornaPreventivo(idPreventivo) {
+
+    const preventivi = JSON.parse(localStorage.getItem("preventivi")) || [];
+    const p = preventivi.find(pr => pr.id === idPreventivo);
+    if (!p) return;
+
+    /* =========================
+       CLIENTE
+       ========================= */
+    p.clienteCodice = prevCliente.dataset.codice;
+
+    /* =========================
+       DESCRIZIONE
+       ========================= */
+    p.descrizione = document.getElementById("prevDescrizione").value.trim();
+
+    /* =========================
+       RICAMBI
+       ========================= */
+    const ricambi = [];
+
+    document.querySelectorAll("#ricambiWrapper .riga-ricambio").forEach(riga => {
+        const descr = riga.querySelector('input[type="text"]').value.trim();
+        const link = riga.querySelector('input[type="url"]').value.trim();
+        const prezzo = Number(riga.querySelector('input[type="number"]').value) || 0;
+
+        if (descr || link || prezzo > 0) {
+            ricambi.push({ descrizione: descr, link, prezzo });
+        }
+    });
+
+    p.ricambi = ricambi;
+
+    /* =========================
+       COSTI
+       ========================= */
+    p.manodopera = Number(prevManodopera.value) || 0;
+    p.sconto = Number(prevSconto.value) || 0;
+    p.totale = Number(prevTotale.value) || 0;
+    p.tempoStimato = Number(prevTempoStimato.value) || 0;
+
+    /* =========================
+       SALVATAGGIO
+       ========================= */
+    localStorage.setItem("preventivi", JSON.stringify(preventivi));
+
+    /* =========================
+       RESET STATO
+       ========================= */
+    preventivoInModificaId = null;
+
+    document.getElementById("btnSalvaPreventivo").innerText = "Salva preventivo";
+
+    resetFormPreventivo();
+    renderPreventivi();
+}
 
 
 function renderPreventivi() {
@@ -575,11 +659,11 @@ function renderPreventivi() {
 
             // click riga → preview (esclusa checkbox)
 
-            tr.onclick = (e) => {
-                 if (e.target.type !== "checkbox") {
-                     apriPreviewPreventivo(p.id);
-                }
-            };
+            //tr.onclick = (e) => {
+             //    if (e.target.type !== "checkbox") {
+              //       apriPreviewPreventivo(p.id);
+              //  }
+           // };
 
             const checkbox = tr.querySelector("input[type='checkbox']");
 
@@ -595,9 +679,16 @@ function renderPreventivi() {
         };
             // click riga → preview
             
-            tr.onclick = () => apriPreviewPreventivo(p.id);
+             /* click riga → MODIFICA preventivo attivo */
+                    tr.onclick = (e) => {
+                    if (e.target.type === "checkbox") return;
+                    caricaPreventivoPerModifica(p.id);
+                    };
+
             tbodyAttivi.appendChild(tr);
+
         }
+        
 
         // =========================
         // STORICO PREVENTIVI
@@ -637,7 +728,13 @@ function renderPreventivi() {
         </td>
     `;
 
-    
+        /* click riga → DUPLICAZIONE preventivo */
+    tr.onclick = () => {
+        caricaPreventivoPerDuplicazione(p.id);
+    };
+
+   
+
 
     tbodyStorico.appendChild(tr);
 }
@@ -864,4 +961,219 @@ function creaOrdiniDaPreventivo(p) {
     });
 
     localStorage.setItem("ordini", JSON.stringify(ordini));
+}
+
+/* =========================================================
+   PREVENTIVI - DUPLICAZIONE DA STORICO
+   ========================================================= */
+
+function caricaPreventivoPerDuplicazione(idPreventivo) {
+
+    /* recupera tutti i preventivi */
+    const preventivi = JSON.parse(localStorage.getItem("preventivi")) || [];
+
+    /* trova il preventivo selezionato */
+    const p = preventivi.find(pr => pr.id === idPreventivo);
+    if (!p) return;
+
+    /* =========================
+       RESET FORM
+       ========================= */
+    resetFormPreventivo();
+
+    /* =========================
+       CLIENTE (VOLUTAMENTE ESCLUSO)
+       ========================= */
+    prevCliente.value = "";
+    delete prevCliente.dataset.codice;
+
+    /* =========================
+       DESCRIZIONE
+       ========================= */
+    document.getElementById("prevDescrizione").value = p.descrizione || "";
+
+    /* =========================
+       RICAMBI
+       ========================= */
+    const ricambiWrapper = document.getElementById("ricambiWrapper");
+    ricambiWrapper.innerHTML = "";
+
+    if (p.ricambi && p.ricambi.length > 0) {
+
+        p.ricambi.forEach((r, index) => {
+
+            const riga = document.createElement("div");
+            riga.className = "riga-ricambio";
+
+            riga.innerHTML = `
+                <input type="text" class="input-gestionale" placeholder="Descrizione ricambio" value="${r.descrizione || ""}">
+                <input type="url" class="input-gestionale" placeholder="Link ricambio" value="${r.link || ""}">
+                <input type="number" class="input-gestionale" placeholder="Prezzo €" value="${r.prezzo || ""}">
+                ${
+                    index === 0
+                        ? `<button type="button" id="btnAddRicambio" class="btn-add-ricambio">+</button>`
+                        : `<button type="button" class="btn-remove-ricambio">−</button>`
+                }
+            `;
+
+            ricambiWrapper.appendChild(riga);
+
+            /* evento rimozione per righe extra */
+            const btnRemove = riga.querySelector(".btn-remove-ricambio");
+            if (btnRemove) {
+                btnRemove.onclick = () => riga.remove();
+            }
+        });
+
+    }
+
+    /* =========================
+       COSTI
+       ========================= */
+    document.getElementById("prevManodopera").value = p.manodopera || "";
+    document.getElementById("prevSconto").value = p.sconto || "";
+    document.getElementById("prevTotale").value = p.totale || "";
+
+    /* =========================
+       TEMPO STIMATO
+       ========================= */
+    document.getElementById("prevTempoStimato").value = p.tempoStimato || "";
+
+    /* =========================
+       FOCUS INIZIALE
+       ========================= */
+    prevCliente.focus();
+}
+
+/* =========================================================
+   PREVENTIVI - MODIFICA ATTIVO
+   ========================================================= */
+
+let preventivoInModificaId = null;   /* id preventivo attualmente in modifica */
+
+/* =========================================================
+   PREVENTIVI - CARICAMENTO PER MODIFICA
+   ========================================================= */
+
+function caricaPreventivoPerModifica(idPreventivo) {
+
+    /* recupera preventivi */
+    const preventivi = JSON.parse(localStorage.getItem("preventivi")) || [];
+
+    /* trova il preventivo */
+    const p = preventivi.find(pr => pr.id === idPreventivo);
+    if (!p) return;
+
+    /* memorizza stato modifica */
+    preventivoInModificaId = p.id;
+
+    /* =========================
+       RESET FORM
+       ========================= */
+    resetFormPreventivo();
+
+    /* =========================
+       CLIENTE
+       ========================= */
+    const cliente = getClienteByCodice(p.clienteCodice);
+    if (cliente) {
+        prevCliente.value =
+            `${cliente.nome} ${cliente.cognome} (${cliente.telefono})`;
+        prevCliente.dataset.codice = cliente.codice;
+    }
+
+    /* =========================
+       DESCRIZIONE
+       ========================= */
+    document.getElementById("prevDescrizione").value = p.descrizione || "";
+
+    /* =========================
+       RICAMBI
+       ========================= */
+    const ricambiWrapper = document.getElementById("ricambiWrapper");
+    ricambiWrapper.innerHTML = "";
+
+    (p.ricambi || []).forEach((r, index) => {
+
+        const riga = document.createElement("div");
+        riga.className = "riga-ricambio";
+
+        riga.innerHTML = `
+            <input type="text" class="input-gestionale" value="${r.descrizione || ""}">
+            <input type="url" class="input-gestionale" value="${r.link || ""}">
+            <input type="number" class="input-gestionale" value="${r.prezzo || ""}">
+            ${
+                index === 0
+                    ? `<button type="button" id="btnAddRicambio" class="btn-add-ricambio">+</button>`
+                    : `<button type="button" class="btn-remove-ricambio">−</button>`
+            }
+        `;
+
+        ricambiWrapper.appendChild(riga);
+
+        const btnRemove = riga.querySelector(".btn-remove-ricambio");
+        if (btnRemove) {
+            btnRemove.onclick = () => riga.remove();
+        }
+    });
+
+    /* =========================
+       COSTI
+       ========================= */
+    document.getElementById("prevManodopera").value = p.manodopera || "";
+    document.getElementById("prevSconto").value = p.sconto || "";
+    document.getElementById("prevTotale").value = p.totale || "";
+
+    /* =========================
+       TEMPO STIMATO
+       ========================= */
+    document.getElementById("prevTempoStimato").value = p.tempoStimato || "";
+
+    /* =========================
+       BOTTONE → MODIFICA
+       ========================= */
+    const btn = document.getElementById("btnSalvaPreventivo");
+    btn.innerText = "Modifica preventivo";
+
+    /* =========================
+         MOSTRA ELIMINA
+        ========================= */
+    document.getElementById("btnEliminaPreventivo").style.display = "block";
+
+
+    /* =========================
+       FOCUS
+       ========================= */
+    prevCliente.focus();
+    
+}
+
+/* =========================================================
+   PREVENTIVI - ELIMINAZIONE PREVENTIVO ATTIVO
+   ========================================================= */
+const btnElimina = document.getElementById("btnEliminaPreventivo");
+if (btnElimina) {
+    btnElimina.onclick = eliminaPreventivoAttivo;
+}
+
+function eliminaPreventivoAttivo() {
+
+    if (!preventivoInModificaId) return;
+
+    if (!confirm("Vuoi eliminare questo preventivo?")) return;
+
+    const preventivi = JSON.parse(localStorage.getItem("preventivi")) || [];
+
+    const index = preventivi.findIndex(p => p.id === preventivoInModificaId);
+    if (index === -1) return;
+
+    /* elimina preventivo */
+    preventivi.splice(index, 1);
+    localStorage.setItem("preventivi", JSON.stringify(preventivi));
+
+    /* reset stato */
+    preventivoInModificaId = null;
+
+    resetFormPreventivo();
+    renderPreventivi();
 }
