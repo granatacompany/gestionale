@@ -484,3 +484,70 @@ button:hover {
 #btnEliminaPreventivo:hover {
     background: #b71c1c;      /* rosso più scuro */
 }
+
+/* =========================================================
+   RESPONSIVE MOBILE (globale)
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  /* Sidebar diventa "topbar" */
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    padding: 10px;
+  }
+
+  .sidebar h2 {
+    margin: 5px 0 10px 0;
+  }
+
+  .sidebar a {
+    display: inline-block;
+    padding: 10px 12px;
+    margin: 4px 4px 0 0;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .sidebar a.active {
+    background: white;
+    color: #0078d7;
+  }
+
+  /* Contenuto non deve più “scappare” a destra */
+  .content {
+    margin-left: 0;
+    padding: 14px;
+  }
+
+  /* Form: da 3 colonne a 1 */
+  .form-container,
+  .form-container.preventivi,
+  .preventivo-avanzato {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+
+  /* Tabelle: scroll orizzontale */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+}
+
+/* =========================================================
+   BOTTONI DISABILITATI (UX)
+   ========================================================= */
+
+button:disabled,
+button[disabled] {
+  background: #cfcfcf !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+}
