@@ -1,8 +1,10 @@
 /* =========================================================
    PREVENTIVI VARIABILE GLOBALE
    ========================================================= */
-let previewPreventivoId = null;
 
+        let previewPreventivoId = null;
+
+        let preventivoAccontoId = null;
 
 
 
@@ -28,13 +30,14 @@ function resetFormPreventivo() {
     const ricambiWrapper = document.getElementById("ricambiWrapper");
     ricambiWrapper.innerHTML = `
         <div class="riga-ricambio">
-            <input type="text" placeholder="Descrizione ricambio"  class="input-gestionale">
-            <input type="url" placeholder="Link ricambio"  class="input-gestionale">
-            <input type="number" placeholder="Prezzo €"  class="input-gestionale">
+            <input type="text" placeholder="Descrizione ricambio" class="input-gestionale">
+            <input type="url" placeholder="Link ricambio" class="input-gestionale">
+            <input type="number" placeholder="Prezzo €" class="input-gestionale" min="0" step="0.01">
+            <input type="number" placeholder="gg consegna" class="input-gestionale" min="0" step="1">
             <button type="button" id="btnAddRicambio" class="btn-add-ricambio">+</button>
-            
         </div>
     `;
+
 
     /* ---------------------------
        COSTI
@@ -88,47 +91,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================================================
-   PREVENTIVI - RICAMBI DINAMICI (+ / -)
+   PREVENTIVI - RICAMBI DINAMICI (+ / -) (EVENT DELEGATION)
    ========================================================= */
+
+function creaRigaRicambio({ descrizione = "", link = "", prezzo = "", leadTime = "" } = {}, isPrimaRiga = false) {
+    /* crea una riga ricambio standard (prezzo + gg consegna) */
+    const riga = document.createElement("div");
+    riga.className = "riga-ricambio";
+
+    riga.innerHTML = `
+        <input type="text" class="input-gestionale" placeholder="Descrizione ricambio" value="${descrizione}">
+        <input type="url" class="input-gestionale" placeholder="Link ricambio" value="${link}">
+        <input type="number" class="input-gestionale" placeholder="Prezzo €" min="0" step="0.01" value="${prezzo}">
+        <input type="number" class="input-gestionale" placeholder="gg consegna" min="0" step="1" value="${leadTime}">
+        ${
+            isPrimaRiga
+                ? `<button type="button" id="btnAddRicambio" class="btn-add-ricambio" title="Aggiungi ricambio">+</button>`
+                : `<button type="button" class="btn-remove-ricambio" title="Rimuovi ricambio">−</button>`
+        }
+    `;
+    return riga;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
 
     const wrapper = document.getElementById("ricambiWrapper");
-    const btnAdd = document.getElementById("btnAddRicambio");
+    if (!wrapper) return;
 
-    if (!wrapper || !btnAdd) return;
+    /* click gestito sul wrapper: funziona anche dopo reset/innerHTML */
+    wrapper.addEventListener("click", (e) => {
 
-    // AGGIUNTA RIGA
-    btnAdd.addEventListener("click", () => {
-        aggiungiRigaRicambio();
+        // + aggiunge riga
+        if (e.target && e.target.id === "btnAddRicambio") {
+            wrapper.appendChild(creaRigaRicambio({}, false));
+            wrapper.querySelector(".riga-ricambio:last-child input[type='text']")?.focus();
+            return;
+        }
+
+        // − rimuove riga
+        if (e.target && e.target.classList.contains("btn-remove-ricambio")) {
+            e.target.closest(".riga-ricambio")?.remove();
+            return;
+        }
     });
 
-    // funzione che crea una nuova riga
-    function aggiungiRigaRicambio() {
-
-        const riga = document.createElement("div");
-        riga.className = "riga-ricambio";
-
-        riga.innerHTML = `
-            <input type="text" class="input-gestionale" placeholder="Descrizione ricambio">
-            <input type="url" class="input-gestionale" placeholder="Link ricambio">
-            <input type="number" class="input-gestionale" placeholder="Prezzo €">
-            <button type="button" class="btn-remove-ricambio" title="Rimuovi ricambio">−</button>
-        `;
-
-        // evento rimozione
-        const btnRemove = riga.querySelector(".btn-remove-ricambio");
-        btnRemove.addEventListener("click", () => {
-            riga.remove();
-        });
-
-        wrapper.appendChild(riga);
-        // focus automatico sulla descrizione del nuovo ricambio
-riga.querySelector("input[type='text']").focus();
-
-    }
-
 });
+
 /* =========================================================
    PREVENTIVI - TOTALE AUTOMATICO CON BLOCCO CAMPO
    ========================================================= */
@@ -167,30 +175,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // calcolo totale
-    function calcolaTotale() {
+function calcolaTotale() {
 
-        if (isPreventivoRapido()) return;
+    // se è preventivo rapido, il totale lo decide l’operatore
+    if (isPreventivoRapido()) return;
 
-        let totale = 0;
+    let imponibile = 0;
 
-        // somma prezzi ricambi
-        ricambiWrapper
-            .querySelectorAll("input[type='number']")
-            .forEach(input => {
-                totale += Number(input.value) || 0;
-            });
+    /* somma prezzi ricambi */
+    ricambiWrapper.querySelectorAll(".riga-ricambio").forEach(riga => {
+        const prezzo = Number(riga.querySelectorAll("input")[2].value) || 0;
+        imponibile += prezzo;
+    });
 
-        // aggiunge manodopera
-        totale += Number(manodoperaInput.value) || 0;
+    /* aggiunge manodopera */
+    imponibile += Number(manodoperaInput.value) || 0;
 
-        // sottrae sconto
-        totale -= Number(scontoInput.value) || 0;
+    if (imponibile < 0) imponibile = 0;
 
-        // evita negativi
-        if (totale < 0) totale = 0;
+    /* IVA 22% */
+    const totaleIvato = imponibile * 1.22;
 
-        totaleInput.value = totale.toFixed(2);
-    }
+    /* SCONTO applicato DOPO l’IVA */
+    const sconto = Number(scontoInput.value) || 0;
+
+    let totaleFinale = totaleIvato - sconto;
+
+    if (totaleFinale < 0) totaleFinale = 0;
+
+    totaleInput.value = totaleFinale.toFixed(2);
+}
+
+
+
 
     // EVENTI
     manodoperaInput.addEventListener("input", calcolaTotale);
@@ -478,19 +495,22 @@ function salvaPreventivo() {
 
     document.querySelectorAll("#ricambiWrapper .riga-ricambio").forEach(riga => {
 
-        const descr = riga.querySelector('input[type="text"]').value.trim();
-        const link = riga.querySelector('input[type="url"]').value.trim();
-        const prezzo = Number(riga.querySelector('input[type="number"]').value) || 0;
+    const descr = riga.querySelectorAll("input")[0].value.trim();
+    const link = riga.querySelectorAll("input")[1].value.trim();
+    const prezzo = Number(riga.querySelectorAll("input")[2].value) || 0;
+    const leadTime = Number(riga.querySelectorAll("input")[3].value) || 0; // gg consegna
 
-        // salva solo se almeno un campo è compilato
-        if (descr || link || prezzo > 0) {
-            ricambi.push({
-                descrizione: descr,
-                link: link,
-                prezzo: prezzo
-            });
-        }
-    });
+    // salva solo se almeno un campo è compilato
+    if (descr || link || prezzo > 0 || leadTime > 0) {
+        ricambi.push({
+            descrizione: descr,
+            link: link,
+            prezzo: prezzo,
+            leadTime: leadTime   // 👈 nuovo campo chiave
+        });
+    }
+});
+
 
     // =========================
     // COSTI
@@ -569,21 +589,29 @@ function aggiornaPreventivo(idPreventivo) {
     p.descrizione = document.getElementById("prevDescrizione").value.trim();
 
     /* =========================
-       RICAMBI
-       ========================= */
-    const ricambi = [];
+   RICAMBI
+   ========================= */
+        const ricambi = [];
 
-    document.querySelectorAll("#ricambiWrapper .riga-ricambio").forEach(riga => {
-        const descr = riga.querySelector('input[type="text"]').value.trim();
-        const link = riga.querySelector('input[type="url"]').value.trim();
-        const prezzo = Number(riga.querySelector('input[type="number"]').value) || 0;
+        document.querySelectorAll("#ricambiWrapper .riga-ricambio").forEach(riga => {
 
-        if (descr || link || prezzo > 0) {
-            ricambi.push({ descrizione: descr, link, prezzo });
-        }
-    });
+            const descr = riga.querySelectorAll("input")[0].value.trim();
+            const link = riga.querySelectorAll("input")[1].value.trim();
+            const prezzo = Number(riga.querySelectorAll("input")[2].value) || 0;
+            const leadTime = Number(riga.querySelectorAll("input")[3].value) || 0; // gg consegna
 
-    p.ricambi = ricambi;
+            if (descr || link || prezzo > 0 || leadTime > 0) {
+                ricambi.push({
+                    descrizione: descr,
+                    link: link,
+                    prezzo: prezzo,
+                    leadTime: leadTime
+                });
+            }
+        });
+
+p.ricambi = ricambi;
+
 
     /* =========================
        COSTI
@@ -652,7 +680,10 @@ function renderPreventivi() {
 
             <td>${p.tempoStimato}</td>
 
+            <td>${p.dataPromessa || "-"}</td>
+
             <td style="text-align:center">
+
                 <input type="checkbox" ${p.accettato ? "checked" : ""}>
             </td>
             `;
@@ -670,12 +701,26 @@ function renderPreventivi() {
              // checkbox accettato
                 tr.querySelector("input[type='checkbox']").onchange = () => {
                 p.accettato = true;
-                localStorage.setItem("preventivi", JSON.stringify(preventivi));
+                    // 📅 data accettazione
+                         p.dataAccettazione = new Date().toISOString().slice(0, 10);
 
-                creaRiparazioneDaPreventivo(p);
-                creaOrdiniDaPreventivo(p);
+                    // 📅 data promessa = +2 giorni
+                    const data = new Date();
+                    data.setDate(data.getDate() + 2);
+                        p.dataPromessa = data.toISOString().slice(0, 10);
 
-            renderPreventivi();
+                        localStorage.setItem("preventivi", JSON.stringify(preventivi));
+
+                        // apri modal acconto PRIMA di creare ordini e riparazioni
+                        apriModalAcconto(p);
+
+
+               // creaRiparazioneDaPreventivo(p);
+               // creaOrdiniDaPreventivo(p);
+
+                renderPreventivi();
+                accettaPreventivo(p);
+
         };
             // click riga → preview
             
@@ -723,6 +768,8 @@ function renderPreventivi() {
 
         <td>${p.tempoStimato}</td>
 
+        <td>${p.dataPromessa || "-"}</td>
+
         <td class="${stato === "Accettato" ? "stato-ok" : "stato-ko"}">
             ${stato}
         </td>
@@ -741,28 +788,52 @@ function renderPreventivi() {
     });
 }
 
-function accettaPreventivo(index) {
+function accettaPreventivo(p) {
+    // data accettazione (ISO YYYY-MM-DD)
+    const oggi = new Date();
+    const dataAcc = oggi.toISOString().slice(0, 10);
+    p.dataAccettazione = dataAcc;
 
-    const preventivi = JSON.parse(localStorage.getItem("preventivi")) || [];
-    const p = preventivi[index];
+    // 1) apri i link dei ricambi (una finestra per link)
+    (p.ricambi || []).forEach(r => {
+        if (r.link) {
+            window.open(r.link, "_blank");
+        }
+    });
 
-    if (!p || p.accettato) return;
+    // 2) crea ordini con leadTime e date
+    const ordini = JSON.parse(localStorage.getItem("ordini")) || [];
+    let dataMax = null;
 
-    if (!confirm("Confermi l'accettazione del preventivo?")) {
-        renderPreventivi();
-        return;
-    }
+    (p.ricambi || []).forEach(r => {
+        const lt = Number(r.leadTime) || 0;
 
-    p.accettato = true;
-    localStorage.setItem("preventivi", JSON.stringify(preventivi));
+        const d = new Date(dataAcc);
+        d.setDate(d.getDate() + lt);
+        const dataPrevista = d.toISOString().slice(0, 10);
 
-    // IN FUTURO:
-    // creaRiparazione(p);
-    // creaOrdine(p);
+        // aggiorna data che comanda (vince il più lento)
+        if (!dataMax || dataPrevista > dataMax) {
+            dataMax = dataPrevista;
+        }
 
-    renderPreventivi();
-    resetFormPreventivo();
+        ordini.push({
+            id: "ORD-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+            preventivoId: p.id,
+            descrizione: r.descrizione,
+            link: r.link || "",
+            leadTime: lt,
+            dataAccettazione: dataAcc,
+            dataConsegnaPrevista: dataPrevista,
+            arrivato: false
+        });
+    });
+
+    p.dataConsegnaMax = dataMax;
+
+    localStorage.setItem("ordini", JSON.stringify(ordini));
 }
+
 /* =========================================================
    PREVENTIVI - STATO DERIVATO (ACCETTATO / RIFIUTATO)
    ========================================================= */
@@ -1006,15 +1077,18 @@ function caricaPreventivoPerDuplicazione(idPreventivo) {
             riga.className = "riga-ricambio";
 
             riga.innerHTML = `
-                <input type="text" class="input-gestionale" placeholder="Descrizione ricambio" value="${r.descrizione || ""}">
-                <input type="url" class="input-gestionale" placeholder="Link ricambio" value="${r.link || ""}">
-                <input type="number" class="input-gestionale" placeholder="Prezzo €" value="${r.prezzo || ""}">
+                <input type="text" class="input-gestionale" value="${r.descrizione || ""}">
+                <input type="url" class="input-gestionale" value="${r.link || ""}">
+                <input type="number" class="input-gestionale" value="${r.prezzo || ""}" min="0" step="0.01">
+                <input type="number" class="input-gestionale" value="${r.leadTime || ""}" min="0" step="1">
                 ${
                     index === 0
                         ? `<button type="button" id="btnAddRicambio" class="btn-add-ricambio">+</button>`
                         : `<button type="button" class="btn-remove-ricambio">−</button>`
                 }
             `;
+
+
 
             ricambiWrapper.appendChild(riga);
 
@@ -1088,34 +1162,39 @@ function caricaPreventivoPerModifica(idPreventivo) {
     document.getElementById("prevDescrizione").value = p.descrizione || "";
 
     /* =========================
-       RICAMBI
-       ========================= */
-    const ricambiWrapper = document.getElementById("ricambiWrapper");
-    ricambiWrapper.innerHTML = "";
+    RICAMBI
+    ========================= */
+        const ricambiWrapper = document.getElementById("ricambiWrapper");
+        ricambiWrapper.innerHTML = "";
 
-    (p.ricambi || []).forEach((r, index) => {
+        (p.ricambi || []).forEach((r, index) => {
 
-        const riga = document.createElement("div");
-        riga.className = "riga-ricambio";
+            const riga = document.createElement("div");
+            riga.className = "riga-ricambio";
 
-        riga.innerHTML = `
-            <input type="text" class="input-gestionale" value="${r.descrizione || ""}">
-            <input type="url" class="input-gestionale" value="${r.link || ""}">
-            <input type="number" class="input-gestionale" value="${r.prezzo || ""}">
-            ${
-                index === 0
-                    ? `<button type="button" id="btnAddRicambio" class="btn-add-ricambio">+</button>`
-                    : `<button type="button" class="btn-remove-ricambio">−</button>`
+            riga.innerHTML = `
+                <input type="text" class="input-gestionale" value="${r.descrizione || ""}">
+                <input type="url" class="input-gestionale" value="${r.link || ""}">
+                <input type="number" class="input-gestionale" value="${r.prezzo || ""}" min="0" step="0.01">
+                <input type="number" class="input-gestionale" value="${r.leadTime ?? ""}" min="0" step="1">
+                ${
+                    index === 0
+                        ? `<button type="button" id="btnAddRicambio" class="btn-add-ricambio">+</button>`
+                        : `<button type="button" class="btn-remove-ricambio">−</button>`
+                }
+            `;
+
+            ricambiWrapper.appendChild(riga);
+
+            // rimuove riga extra
+            const btnRemove = riga.querySelector(".btn-remove-ricambio");
+            if (btnRemove) {
+                btnRemove.onclick = () => riga.remove();
             }
-        `;
+        });
 
-        ricambiWrapper.appendChild(riga);
 
-        const btnRemove = riga.querySelector(".btn-remove-ricambio");
-        if (btnRemove) {
-            btnRemove.onclick = () => riga.remove();
-        }
-    });
+
 
     /* =========================
        COSTI
@@ -1175,5 +1254,60 @@ function eliminaPreventivoAttivo() {
     preventivoInModificaId = null;
 
     resetFormPreventivo();
+    renderPreventivi();
+}
+function apriModalAcconto(p) {
+
+    preventivoAccontoId = p.id;
+
+    // mostra totale
+    document.getElementById("acconto-totale").innerText = p.totale.toFixed(2);
+
+    // suggerimento 15%
+    const suggerito = (p.totale * 0.15).toFixed(2);
+    const input = document.getElementById("inputAcconto");
+
+    input.value = "";
+    input.placeholder = ` (${suggerito} € suggerito)`;
+
+    document.getElementById("modalAcconto").style.display = "flex";
+    input.focus();
+}
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btn = document.getElementById("btnConfermaAcconto");
+    if (!btn) return;
+
+    btn.onclick = confermaAccontoPreventivo;
+});
+
+function confermaAccontoPreventivo() {
+
+    const input = document.getElementById("inputAcconto");
+    const valore = Number(input.value);
+
+    if (valore <= -1) {
+        alert("Inserisci un acconto valido");
+        input.focus();
+        return;
+    }
+
+    const preventivi = JSON.parse(localStorage.getItem("preventivi")) || [];
+    const p = preventivi.find(pr => pr.id === preventivoAccontoId);
+    if (!p) return;
+
+    p.acconto = valore;
+    p.accontoPercentuale = Math.round((valore / p.totale) * 100);
+
+    localStorage.setItem("preventivi", JSON.stringify(preventivi));
+
+    // ora sì: crea ordini e riparazione
+    creaRiparazioneDaPreventivo(p);
+    creaOrdiniDaPreventivo(p);
+
+    // chiudi modal
+    document.getElementById("modalAcconto").style.display = "none";
+    preventivoAccontoId = null;
+
     renderPreventivi();
 }

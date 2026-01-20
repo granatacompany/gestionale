@@ -3,15 +3,36 @@ document.addEventListener("DOMContentLoaded", renderRiparazioni);
 function renderRiparazioni() {
 
     const riparazioni = JSON.parse(localStorage.getItem("riparazioni")) || [];
-    const ordini = JSON.parse(localStorage.getItem("ordini")) || [];
 
-    const tbody = document.querySelector("#tabRiparazioni tbody");
-    if (!tbody) return;
+    const tbodyAttive = document.querySelector("#tabRiparazioni tbody");
+    const tbodyStorico = document.querySelector("#tabRiparazioniStorico tbody");
 
-    tbody.innerHTML = "";
+    if (!tbodyAttive || !tbodyStorico) return;
+
+    tbodyAttive.innerHTML = "";
+    tbodyStorico.innerHTML = "";
 
     riparazioni.forEach(r => {
 
+        // =========================
+        // STORICO (COMPLETATE)
+        // =========================
+        if (r.stato === "completata") {
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${r.id}</td>
+                <td>${r.clienteCodice}</td>
+                <td>${r.descrizione}</td>
+                <td>${r.dataFine || "-"}</td>
+            `;
+            tbodyStorico.appendChild(tr);
+            return;
+        }
+
+        // =========================
+        // RIPARAZIONI ATTIVE
+        // =========================
         let azioni = "";
 
         if (r.stato === "in_attesa_ricambi") {
@@ -36,10 +57,6 @@ function renderRiparazioni() {
             `;
         }
 
-        if (r.stato === "completata") {
-            azioni = "✔️";
-        }
-
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${r.id}</td>
@@ -49,9 +66,10 @@ function renderRiparazioni() {
             <td>${azioni}</td>
         `;
 
-        tbody.appendChild(tr);
+        tbodyAttive.appendChild(tr);
     });
 }
+
 
 
 

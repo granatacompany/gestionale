@@ -8,9 +8,6 @@
 </head>
 <body>
 
-<!-- ==============================
-     SIDEBAR
-     ============================== -->
 <div class="sidebar">
     <h2>Spazioexe</h2>
     <a href="dashboard.html">Dashboard</a>
@@ -19,47 +16,50 @@
     <a href="preventivi.html">Preventivi</a>
     <a href="riparazioni.html">Riparazioni</a>
     <a href="ordini.html">Ordini</a>
-    
 </div>
 
-<!-- ==============================
-     CONTENUTO PRINCIPALE
-     ============================== -->
 <div class="content">
 
     <h1>Ordini ricambi</h1>
 
-    
-    </div>
-
-    <!-- ==============================
-         TABELLA ORDINI APERTI
-         ============================== -->
-
     <h2>Ordini aperti</h2>
-
     <table id="tabOrdini">
         <thead>
             <tr>
-            <th>ID</th>
-            <th>Preventivo</th>
-            <th>Ricambio</th>
-            <th>Link</th>
-            <th>Arrivato</th>
+                <th>ID</th>
+                <th>Preventivo</th>
+                <th>Ricambio</th>
+                <th>gg</th>
+                <th>Consegna prevista</th>
+                <th>Link</th>
+                <th>Stato</th>
+                <th>Arrivato</th>
             </tr>
         </thead>
-        <tbody>
-            <!-- righe generate via JavaScript -->
-        </tbody>
+
+        <tbody></tbody>
+    </table>
+
+    <h2>Storico ordini</h2>
+    <table id="tabOrdiniStorico">
+        <thead>
+            <tr>
+                <th>Data arrivo</th>
+                <th>ID</th>
+                <th>Preventivo</th>
+                <th>Ricambio</th>
+                <th>Link</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
     </table>
 
 </div>
 
-<!-- SCRIPT GLOBALI -->
 <script src="js/script.js"></script>
-
-<!-- SCRIPT DELLA PAGINA -->
 <script src="js/ordini.js"></script>
 
 </body>
+
 </html>
+s

@@ -64,13 +64,14 @@
             ></textarea>
             
         
-            <!-- COSTI BASE -->
-        <input
-            type="number"
-            id="prevTotale"
-            class="input-gestionale"
-            placeholder="Totale €"
-        >
+        <!-- COSTI BASE -->
+            <input
+                type="number"
+                id="prevTotale"
+                class="input-gestionale"
+                placeholder="Totale €"
+                title="Totale IVA inclusa (22%)"
+            >
 
         
 
@@ -88,33 +89,42 @@
 
     <!-- RIGA RICAMBIO 1 -->
     <div class="riga-ricambio">
-        <input
-            type="text"
-            class="input-gestionale"
-            placeholder="Descrizione ricambio"
-        >
-        <input
-            type="url"
-            class="input-gestionale"
-            placeholder="Link ricambio"
-        >
-        <input
-            type="number"
-            class="input-gestionale"
-            placeholder="Prezzo €"
-        >
-        <div style="display:flex; flex-direction:column; gap:4px;">
+    <input
+        type="text"
+        class="input-gestionale"
+        placeholder="Descrizione ricambio"
+    >
+    <input
+        type="url"
+        class="input-gestionale"
+        placeholder="Link ricambio"
+    >
+    <input
+        type="number"
+        class="input-gestionale"
+        placeholder="Prezzo €"
+        min="0"
+        step="0.01"
+    >
+    <input
+        type="number"
+        class="input-gestionale"
+        placeholder="gg consegna"
+        min="0"
+        step="1"
+        title="Giorni di consegna previsti"
+    >
     <button
         type="button"
-        class="btn-add-ricambio"
         id="btnAddRicambio"
+        class="btn-add-ricambio"
         title="Aggiungi ricambio"
     >+</button>
-
 </div>
 
 
-    </div>
+
+   
 
 </div>
 
@@ -132,7 +142,9 @@
                 id="prevSconto"
                 class="input-gestionale"
                 placeholder="Sconto €"
+                title="Sconto applicato dopo IVA (serve per arrotondare il totale)"
             >
+
 
             <input
                 type="number"
@@ -166,7 +178,10 @@
       <th>Ricambi</th>
       <th>Totale</th>
       <th>Tempo</th>
+      <th>Promessa</th>
       <th>Accettato</th>
+      
+
       
     </tr>
   </thead>
@@ -185,7 +200,10 @@
         <th>Ricambi</th>
         <th>Totale</th>
         <th>Tempo</th>
+        <th>Promessa</th>
         <th>Stato</th>
+        
+
     </tr>
   </thead>
   <tbody></tbody>
@@ -213,6 +231,35 @@
 
   </div>
 </div>
+
+<!-- =====================================================
+     MODAL ACCONTO PREVENTIVO
+     ===================================================== -->
+<div id="modalAcconto" class="preview-overlay" style="display:none">
+  <div class="preview-box">
+
+    <h2>Inserisci acconto</h2>
+
+    <p>
+      Totale preventivo: <strong>€ <span id="acconto-totale"></span></strong>
+    </p>
+
+    <input
+      type="number"
+      id="inputAcconto"
+      class="input-gestionale"
+      placeholder="(Acconto suggerito)"
+      min="-1"
+      step="0.01"
+    >
+
+    <div class="preview-actions">
+      <button id="btnConfermaAcconto">Conferma</button>
+    </div>
+
+  </div>
+</div>
+
 
 
 <!-- SCRIPT GLOBALI -->

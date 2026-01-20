@@ -294,10 +294,11 @@ tr.selected {
 
 .riga-ricambio {
     display: grid;
-    grid-template-columns: 2fr 2fr 1fr 36px; /* descrizione | link | prezzo | + */
+    grid-template-columns: 2fr 2fr 1fr 1fr 36px;
     gap: 10px;
     align-items: center;
 }
+
 
 /* =========================================================
    PREVENTIVI - BOTTONE + RICAMBIO (QUADRATO)
@@ -550,4 +551,27 @@ button[disabled] {
   color: #666 !important;
   cursor: not-allowed !important;
   opacity: 1 !important;
+}
+/* ===============================
+   SEMAFORO ORDINI
+   =============================== */
+
+.semaforo {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ccc; /* neutro */
+}
+
+.semaforo.rosso {
+    background: #e53935;
+}
+
+.semaforo.giallo {
+    background: #fbc02d;
+}
+
+.semaforo.verde {
+    background: #43a047;
 }
