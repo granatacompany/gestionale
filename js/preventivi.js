@@ -7,11 +7,6 @@
         let preventivoAccontoId = null;
 
 
-
-
-
-
-
 /* =========================================================
    PREVENTIVI - RESET FORM
    ========================================================= */
@@ -1021,18 +1016,26 @@ function creaOrdiniDaPreventivo(p) {
 
         if (!r.descrizione) return;
 
+        // 🔒 DEDUPE: evita duplicati stesso preventivo + descrizione
+        const esisteGia = ordini.some(o =>
+            o.preventivoId === p.id &&
+            (o.descrizione || "").trim().toLowerCase() === r.descrizione.trim().toLowerCase()
+        );
+
+        if (esisteGia) return;
+
         ordini.push({
             id: "O-" + String(ordini.length + 1).padStart(4, "0"),
             preventivoId: p.id,
             descrizione: r.descrizione,
-            link: r.link || "",   // 👈 QUI
+            link: r.link || "",
             arrivato: false
         });
-
     });
 
     localStorage.setItem("ordini", JSON.stringify(ordini));
 }
+
 
 /* =========================================================
    PREVENTIVI - DUPLICAZIONE DA STORICO
@@ -1284,9 +1287,12 @@ document.addEventListener("DOMContentLoaded", () => {
 function confermaAccontoPreventivo() {
 
     const input = document.getElementById("inputAcconto");
+    if (!input) return;
+
     const valore = Number(input.value);
 
-    if (valore <= -1) {
+    // valido solo > 0
+    if (!valore || valore <= 0) {
         alert("Inserisci un acconto valido");
         input.focus();
         return;
@@ -1296,16 +1302,32 @@ function confermaAccontoPreventivo() {
     const p = preventivi.find(pr => pr.id === preventivoAccontoId);
     if (!p) return;
 
+    // 1) salva acconto nel preventivo
     p.acconto = valore;
     p.accontoPercentuale = Math.round((valore / p.totale) * 100);
 
     localStorage.setItem("preventivi", JSON.stringify(preventivi));
 
-    // ora sì: crea ordini e riparazione
+    // 2) registra movimento in Vendite (ENTRATA) collegato al preventivo
+    const vendite = JSON.parse(localStorage.getItem("vendite")) || [];
+
+    vendite.push({
+        id: "V-" + Date.now(),
+        data: new Date().toISOString().slice(0, 10),
+        tipo: "entrata",
+        clienteCodice: p.clienteCodice || "",
+        descrizione: "Acconto preventivo",
+        importo: Number(valore.toFixed(2)),
+        preventivoId: p.id
+    });
+
+    localStorage.setItem("vendite", JSON.stringify(vendite));
+
+    // 3) crea ordini e riparazione (come già previsto dal tuo flusso)
     creaRiparazioneDaPreventivo(p);
     creaOrdiniDaPreventivo(p);
 
-    // chiudi modal
+    // 4) chiudi modal
     document.getElementById("modalAcconto").style.display = "none";
     preventivoAccontoId = null;
 

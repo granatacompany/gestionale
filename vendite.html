@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendite</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body>
+
+<!-- =========================================================
+     SIDEBAR
+     ========================================================= -->
+<div class="sidebar">
+    <h2>Spazioexe</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="clienti.html">Clienti</a>
+    <a href="magazzino.html">Magazzino</a>
+    <a href="preventivi.html">Preventivi</a>
+    <a href="riparazioni.html">Riparazioni</a>
+    <a href="ordini.html">Ordini</a>
+    <a href="vendite.html">Vendite</a>
+</div>
+
+<!-- =========================================================
+     CONTENUTO
+     ========================================================= -->
+<div class="content">
+
+        <h1>Vendite (Cassa)</h1>
+
+        <!-- TOGGLE MODALITÀ -->
+        <div style="margin-bottom: 20px;">
+           <button id="toggleVenditaTipo" class="toggle-rapido">
+                ENTRATA
+            </button>
+        </div>
+
+    <!-- FORM -->
+    <div class="form-container preventivi">
+
+   <!-- CLIENTE -->
+        <div class="autocomplete-container">
+            <input
+                type="text"
+                id="venditaCliente"
+                class="input-gestionale"
+                placeholder="Cliente (barcode o ricerca)"
+                autocomplete="off"
+            >
+            <div id="autocompleteClientiVendite" class="autocomplete-list"></div>
+        </div>
+
+        <!-- DESCRIZIONE -->
+        <input
+            type="text"
+            id="venditaDescrizione"
+            class="input-gestionale"
+            placeholder="Articolo / Servizio / Rimborso"
+        >
+
+        <!-- IMPORTO -->
+        <input
+            type="number"
+            id="venditaImporto"
+            class="input-gestionale"
+            placeholder="Importo €"
+            min="0"
+            step="0.01"
+        >
+
+        <!-- SALVA -->
+        <button id="btnSalvaVendita" style="grid-column:1/-1;">
+            Registra movimento
+        </button>
+
+
+</div>
+
+<h2>Vendite da concludere</h2>
+
+<table id="tabDaConcludere">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Origine</th>
+            <th>Descrizione</th>
+            <th>Importo €</th>
+            <th>Azione</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+
+    
+
+    <h2>Movimenti</h2>
+
+    <table id="tabVendite">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Cliente</th>
+                <th>Voce</th>
+                <th>Importo €</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+</div>
+
+<!-- MODAL INCASSO SALDO -->
+<div id="modalIncassoSaldo" class="preview-overlay" style="display:none;">
+    <div class="preview-box">
+
+        <h3>Incasso cliente</h3>
+
+        <p><strong>Cliente:</strong> <span id="saldoCliente"></span></p>
+        <p><strong>Lavoro:</strong> <span id="saldoDescrizione"></span></p>
+
+        <p style="margin-top:10px;">
+            <strong>Importo da incassare:</strong>
+        </p>
+
+        <input
+            type="text"
+            id="saldoImporto"
+            class="input-gestionale"
+            disabled
+        >
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+            <button onclick="chiudiModalIncassoSaldo()">Indietro</button>
+            <button onclick="confermaIncassoSaldo()" class="btn-primary">
+                Incassa
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+
+<!-- SCRIPT GLOBALI -->
+<script src="js/script.js"></script>
+<script src="js/vendite.js"></script>
+
+
+
+</body>
+</html>
