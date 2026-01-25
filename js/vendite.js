@@ -18,6 +18,15 @@ document.addEventListener("DOMContentLoaded", () => {
     renderVendite();
     renderVenditeDaConcludere();
 
+    initAutofillImportoDaMagazzinoVendite();
+
+    
+const btnChiusura = document.getElementById("btnChiusuraGiornaliera");
+if (btnChiusura) {
+    btnChiusura.addEventListener("click", apriChiusuraGiornaliera);
+}
+
+
 });
 
 /* =========================================================
@@ -109,6 +118,14 @@ function salvaVendita() {
             importo: Number(importo.toFixed(2))
         });
 
+        // Tentativo scarico magazzino:
+        // se nel campo Articolo/Servizio è stato sparato un barcode
+        // e il codice esiste in magazzino → scarico automatico
+        if (tipoVendita === "entrata") {
+            scaricaMagazzinoDaVendita(descrizione);
+        }
+
+
         localStorage.setItem("vendite", JSON.stringify(vendite));
 
         resetVenditaForm();
@@ -119,6 +136,31 @@ function salvaVendita() {
         btn.disabled = false;
     }
 }
+function initAutofillImportoDaMagazzinoVendite() {
+
+    const inputDescr = document.getElementById("venditaDescrizione");
+    const inputImporto = document.getElementById("venditaImporto");
+    if (!inputDescr || !inputImporto) return;
+
+    inputDescr.addEventListener("change", () => {
+
+        const codice = inputDescr.value.trim();
+        if (!codice) return;
+
+        const magazzino = JSON.parse(localStorage.getItem("magazzino")) || [];
+        const articolo = magazzino.find(a => a.codice === codice);
+        if (!articolo) return;
+
+        const valoreBase = Number(articolo.valore || 0);
+        if (!valoreBase) return;
+
+        // IVA 22%
+        const valoreIvato = valoreBase * 1.22;
+
+        inputImporto.value = valoreIvato.toFixed(2);
+    });
+}
+
 
 function resetVenditaForm() {
     // reset toggle → ENTRATA (OFF)
@@ -445,4 +487,117 @@ function registraIncassoDaRiparazione(r) {
     // 3️⃣ refresh UI
     renderVendite();
     renderVenditeDaConcludere();
+}
+
+/* =========================================================
+   Chiusura giornaliera
+   ========================================================= */
+
+function apriChiusuraGiornaliera() {
+
+    const oggi = new Date().toISOString().slice(0, 10);
+    const vendite = JSON.parse(localStorage.getItem("vendite")) || [];
+
+    let totaleEntrate = 0;
+    let totaleAcconti = 0;
+    let totaleRiparazioni = 0;
+    let totaleVendite = 0;
+
+    vendite.forEach(v => {
+
+        if (v.tipo !== "entrata") return;
+        if (v.data !== oggi) return;
+
+        const importo = Number(v.importo) || 0;
+        totaleEntrate += importo;
+
+        // RIPARAZIONE (saldo finale)
+        if ((v.descrizione || "").includes("Saldo riparazione")) {
+            totaleRiparazioni += importo;
+            return;
+        }
+
+        // ACCONTO
+        if (v.preventivoId) {
+            totaleAcconti += importo;
+            return;
+        }
+
+        // VENDITA
+        totaleVendite += importo;
+    });
+
+    // Popola UI
+    document.getElementById("chiusuraData").innerText =
+        `Chiusura giornaliera – ${oggi.split("-").reverse().join("/")}`;
+
+    document.getElementById("totaleEntrate").innerText = totaleEntrate.toFixed(2);
+    document.getElementById("totaleAcconti").innerText = totaleAcconti.toFixed(2);
+    document.getElementById("totaleRiparazioni").innerText = totaleRiparazioni.toFixed(2);
+    document.getElementById("totaleVendite").innerText = totaleVendite.toFixed(2);
+
+    document.getElementById("modalChiusuraGiornaliera").style.display = "flex";
+}
+function chiudiChiusuraGiornaliera() {
+    document.getElementById("modalChiusuraGiornaliera").style.display = "none";
+}
+function inviaChiusuraWhatsApp() {
+
+    const data = document.getElementById("chiusuraData").innerText;
+    const totale = document.getElementById("totaleEntrate").innerText;
+    const acconti = document.getElementById("totaleAcconti").innerText;
+    const riparazioni = document.getElementById("totaleRiparazioni").innerText;
+    const vendite = document.getElementById("totaleVendite").innerText;
+
+    const messaggio = `
+${data}
+
+Totale entrate: € ${totale}
+
+- Acconti: € ${acconti}
+- Riparazioni: € ${riparazioni}
+- Vendite: € ${vendite}
+`.trim();
+
+    const numero = "3899511899";
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(messaggio)}`;
+
+    window.open(url, "_blank");
+}
+
+/* =========================================================
+   MAGAZZINO → SCARICO DA VENDITE
+   ========================================================= */
+
+function scaricaMagazzinoDaVendita(codicePossibile) {
+
+    if (!codicePossibile) return;
+
+    const codice = codicePossibile.trim();
+    if (!codice) return;
+
+    const magazzino = JSON.parse(localStorage.getItem("magazzino")) || [];
+    const movimenti = JSON.parse(localStorage.getItem("movimentiMagazzino")) || [];
+
+    const articolo = magazzino.find(a => a.codice === codice);
+    if (!articolo) return; // non è un articolo di magazzino
+
+    if (articolo.quantita <= 0) {
+        alert(`Attenzione: "${articolo.descrizione}" presente in magazzino ma quantità = 0`);
+        return;
+    }
+
+    // scarico 1 pezzo
+    articolo.quantita -= 1;
+
+    // registra movimento
+    movimenti.push({
+        data: new Date().toISOString().slice(0, 10),
+        tipo: "scarico",
+        codice: articolo.codice,
+        descrizione: articolo.descrizione
+    });
+
+    localStorage.setItem("magazzino", JSON.stringify(magazzino));
+    localStorage.setItem("movimentiMagazzino", JSON.stringify(movimenti));
 }

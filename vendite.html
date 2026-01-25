@@ -31,11 +31,18 @@
         <h1>Vendite (Cassa)</h1>
 
         <!-- TOGGLE MODALITÀ -->
-        <div style="margin-bottom: 20px;">
-           <button id="toggleVenditaTipo" class="toggle-rapido">
+        <div style="margin-bottom: 20px; display:flex; gap:10px; align-items:center;">
+            
+            <button id="btnChiusuraGiornaliera" class="toggle-rapido">
+                Chiusura giornaliera
+            </button>
+
+            <button id="toggleVenditaTipo" class="toggle-rapido">
                 ENTRATA
             </button>
+
         </div>
+
 
     <!-- FORM -->
     <div class="form-container preventivi">
@@ -137,6 +144,30 @@
             <button onclick="chiudiModalIncassoSaldo()">Indietro</button>
             <button onclick="confermaIncassoSaldo()" class="btn-primary">
                 Incassa
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL CHIUSURA GIORNALIERA -->
+<div id="modalChiusuraGiornaliera" class="preview-overlay" style="display:none;">
+    <div class="preview-box">
+
+        <h3 id="chiusuraData">Chiusura giornaliera</h3>
+
+        <p><strong>Totale entrate:</strong> € <span id="totaleEntrate"></span></p>
+
+        <p style="margin-top:10px;">
+            • Acconti: € <span id="totaleAcconti"></span><br>
+            • Riparazioni: € <span id="totaleRiparazioni"></span><br>
+            • Vendite: € <span id="totaleVendite"></span>
+        </p>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+            <button onclick="chiudiChiusuraGiornaliera()">Chiudi</button>
+            <button onclick="inviaChiusuraWhatsApp()" class="btn-primary">
+                WhatsApp
             </button>
         </div>
 

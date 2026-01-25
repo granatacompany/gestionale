@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magazzino</title>
-    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
@@ -17,18 +17,191 @@
     <a href="riparazioni.html">Riparazioni</a>
     <a href="ordini.html">Ordini</a>
     <a href="vendite.html">Vendite</a>
-    
 </div>
 
 <div class="content">
+
     <h1>Magazzino</h1>
 
-  
+    <!-- =========================================================
+         TOGGLE SOTTO-PAGINE: MAGAZZINO / MOVIMENTI
+         (usa .toggle-rapido + .attivo già presente in style.css)
+         ========================================================= -->
+    <div style="margin-bottom: 20px; display:flex; gap:10px; align-items:center;">
+        <button id="toggleMagazzinoTab" class="toggle-rapido">MAGAZZINO</button>
+        <button id="toggleMovimentiTab" class="toggle-rapido">MOVIMENTI</button>
+    </div>
+
+    <!-- =========================================================
+         VIEW: MAGAZZINO
+         ========================================================= -->
+    <div id="viewMagazzino">
+
+        <h2>Carico articolo</h2>
+
+        <!-- FORM CARICO -->
+        <div class="form-container" style="max-width:900px;">
+
+            <input
+                type="text"
+                id="magCodice"
+                class="input-gestionale"
+                placeholder="Codice (IMEI o barcode)"
+                title="Codice IMEI per smartphone, codice articolo per ricambi/accessori. Puoi inserirlo anche con la pistola barcode."
+            >
+
+            <select
+                id="magCategoria"
+                class="input-gestionale"
+                title="Seleziona la categoria dell’articolo"
+            >
+                <option value="">Seleziona categoria</option>
+                <option value="ricambio">Ricambio</option>
+                <option value="smartphone">Smartphone</option>
+                <option value="pc">PC</option>
+                <option value="accessorio">Accessorio</option>
+            </select>
+
+            <input
+                type="text"
+                id="magCompatibilita"
+                class="input-gestionale"
+                placeholder="Compatibilità (es. iPhone 12) oppure -"
+                title="Per quale modello è compatibile. Usa '-' se va bene per tutti."
+            >
+
+            <input
+                type="text"
+                id="magDescrizione"
+                class="input-gestionale"
+                placeholder="Descrizione"
+                title="Descrizione generica dell’articolo"
+            >
+
+            <input
+                type="number"
+                id="magPrezzoAcquisto"
+                class="input-gestionale"
+                placeholder="Prezzo acquisto €"
+                min="0"
+                step="0.01"
+                title="Costo di acquisto del prodotto/ricambio"
+            >
+
+            <input
+                type="number"
+                id="magValore"
+                class="input-gestionale"
+                placeholder="Valore (prezzo vendita) €"
+                min="0"
+                step="0.01"
+                title="Prezzo di vendita al cliente finale"
+            >
+
+            <input
+                type="number"
+                id="magQuantita"
+                class="input-gestionale"
+                placeholder="Quantità"
+                min="0"
+                step="1"
+                title="Pezzi disponibili da caricare in magazzino"
+            >
+
+            <button id="btnCaricaMagazzino" style="grid-column:1/-1;">
+                Carica in magazzino
+            </button>
+
+            <button id="btnStampaEtichetta" style="grid-column:1/-1; display:none;">
+                Stampa etichetta (barcode)
+            </button>
+
+        </div>
+
+        <!-- RICERCA LIVE -->
+        <input
+            type="text"
+            id="searchMagazzino"
+            class="input-gestionale"
+            placeholder="Cerca in magazzino..."
+            title="Filtra in tempo reale per codice, descrizione, compatibilità o categoria"
+            style="max-width:900px; margin:20px auto 10px auto; display:block;"
+        >
+
+        <!-- FILTRI (solo categoria + compatibilità) -->
+        <div style="max-width:900px; margin:0 auto; display:flex; gap:10px; align-items:center;">
+            <select id="filtroCategoria" class="input-gestionale" title="Filtro per categoria" style="flex:1;">
+                <option value="">Tutte le categorie</option>
+                <option value="ricambio">Ricambio</option>
+                <option value="smartphone">Smartphone</option>
+                <option value="pc">PC</option>
+                <option value="accessorio">Accessorio</option>
+            </select>
+
+            <input
+                type="text"
+                id="filtroCompatibilita"
+                class="input-gestionale"
+                placeholder="Filtro compatibilità (es. iPhone 12)"
+                title="Filtro sulla colonna compatibilità"
+                style="flex:2;"
+            >
+        </div>
+
+        <!-- TABELLA MAGAZZINO -->
+        <table id="tabMagazzino">
+            <thead>
+                <tr>
+                    <th>Codice</th>
+                    <th>Categoria</th>
+                    <th>Compatibilità</th>
+                    <th>Descrizione</th>
+                    <th>Prezzo acquisto</th>
+                    <th>Valore</th>
+                    <th>Quantità</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+    </div>
+
+    <!-- =========================================================
+         VIEW: MOVIMENTI
+         ========================================================= -->
+    <div id="viewMovimenti" style="display:none;">
+
+        <h2>Movimenti magazzino</h2>
+
+        <!-- TOGGLE ENTRATA / USCITA -->
+        <div style="margin: 10px 0 20px 0;">
+            <button id="toggleMovimentiTipo" class="toggle-rapido">
+                ENTRATA
+            </button>
+        </div>
+
+        <!-- TABELLA MOVIMENTI -->
+        <table id="tabMovimentiMagazzino">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Codice</th>
+                    <th>Descrizione</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+    </div>
+
 </div>
 
-
-
-<!-- SCRIPT DELLA PAGINA -->
+<!-- SCRIPT GLOBALI -->
 <script src="js/script.js"></script>
+
+<!-- SCRIPT DELLA PAGINA (step 2 lo creeremo) -->
+<script src="js/magazzino.js"></script>
+
 </body>
 </html>
