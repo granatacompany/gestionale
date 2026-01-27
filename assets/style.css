@@ -733,24 +733,7 @@ body {
     color: #1f2937;              /* quasi nero */
 }
 
-/* === SIDEBAR === */
-.sidebar {
-    background-color: #0b1220;   /* blu notte */
-}
 
-.sidebar h2 {
-    color: #ffffff;
-}
-
-.sidebar a {
-    color: #c7d2fe;
-}
-
-.sidebar a:hover,
-.sidebar a.active {
-    background-color: #1e293b;
-    color: #ffffff;
-}
 
 /* === CONTENUTO === */
 .content {
