@@ -580,6 +580,49 @@ button:hover {
     max-width: 100%;
   }
 }
+/* =====================================================
+   DASHBOARD – FIX MOBILE
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+    /* Griglia dashboard: da 12 colonne → 1 colonna */
+    .dash-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    /* Tutte le card occupano tutta la larghezza */
+    .dash-grid > .card {
+        grid-column: 1 / -1 !important;
+    }
+
+    /* KPI più compatti su mobile */
+    .kpi {
+        font-size: 26px;
+    }
+
+    /* Titoli card leggermente più piccoli */
+    .card h3 {
+        font-size: 12px;
+    }
+
+    /* Attività urgenti: testo va a capo bene */
+    .list .row {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .list .row a {
+        margin-left: auto;
+    }
+
+    /* Grafico: altezza ridotta */
+    .chart-wrap {
+        height: 200px;
+    }
+}
+
 
 /* =========================================================
    BOTTONI DISABILITATI (UX)
