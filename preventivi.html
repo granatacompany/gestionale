@@ -31,14 +31,23 @@
 
     <h1>Preventivi</h1>
 
-    <!-- =====================================================
-         TOGGLE PREVENTIVO RAPIDO
-         ===================================================== -->
-    <div style="margin-bottom: 20px;">
-        <button id="btnRapido" class="toggle-rapido">
-            Preventivo rapido
-        </button>
-    </div>
+<!-- TOGGLE PREVENTIVI / STORICO -->
+<div style="margin-bottom: 20px; display:flex; gap:10px; align-items:center;">
+
+    <button id="btnRapido" class="toggle-rapido">
+        Preventivo rapido
+    </button>
+
+    <button id="togglePreventiviAttiviTab" class="toggle-rapido attivo">
+        PREVENTIVI ATTIVI
+    </button>
+
+    <button id="togglePreventiviStoricoTab" class="toggle-rapido">
+        STORICO PREVENTIVI
+    </button>
+
+</div>
+
 
     <!-- =====================================================
          FORM PREVENTIVO
@@ -98,7 +107,7 @@
     >
     <input
         type="url"
-        class="input-gestionale"
+        class="input-gestionale ricambio-link-codice"
         placeholder="Link ricambio o codice magazzino"
     >
     <input
@@ -171,6 +180,9 @@
     <!-- =====================================================
          TABELLA PREVENTIVI Attivi
          ===================================================== -->
+         <!-- VIEW PREVENTIVI ATTIVI -->
+<div id="viewPreventiviAttivi">
+    <h2>Preventivi attivi</h2>
    <table id="tabPreventivi">
   <thead>
     <tr>
@@ -189,10 +201,14 @@
   </thead>
   <tbody></tbody>
 </table>
+</div>
  <!-- =====================================================
          TABELLA storico PREVENTIVI
          ===================================================== -->
+<!-- VIEW STORICO PREVENTIVI -->
+<div id="viewPreventiviStorico" style="display:none;">
 <h2>Storico preventivi</h2>
+
 <table id="tabStoricoPreventivi">
   <thead>
     <tr>
@@ -210,8 +226,8 @@
   </thead>
   <tbody></tbody>
 </table>
-
 </div>
+
 <td class="${classe}">${stato}</td>
 
 <div id="previewPreventivo" style="display:none" class="preview-overlay">

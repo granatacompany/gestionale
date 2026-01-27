@@ -238,12 +238,30 @@ function renderMagazzino() {
 
 function selezionaRigaMagazzino(tr, articolo) {
 
+    // evidenzia riga selezionata
     document.querySelectorAll("#tabMagazzino tr").forEach(r => r.classList.remove("selected"));
     tr.classList.add("selected");
 
     rigaMagazzinoSelezionata = articolo;
+
+    // mostra bottone stampa etichetta
     document.getElementById("btnStampaEtichetta").style.display = "inline-block";
+
+    // =========================
+    // AUTOFILL CAMPI FORM
+    // =========================
+    document.getElementById("magCodice").value = articolo.codice || "";
+    document.getElementById("magCategoria").value = articolo.categoria || "";
+    document.getElementById("magCompatibilita").value = articolo.compatibilita || "";
+    document.getElementById("magDescrizione").value = articolo.descrizione || "";
+    document.getElementById("magPrezzoAcquisto").value = articolo.prezzoAcquisto ?? "";
+    document.getElementById("magValore").value = articolo.valore ?? "";
+
+    // ⚠️ quantità volutamente NON compilata
+    document.getElementById("magQuantita").value = "";
+    document.getElementById("magQuantita").focus();
 }
+
 
 /* =========================================================
    STAMPA ETICHETTA (SOLO BARCODE)
@@ -322,3 +340,36 @@ function renderMovimenti() {
             tbody.appendChild(tr);
         });
 }
+/* =========================================================
+   MAGAZZINO - INVIO = PASSA AL CAMPO SUCCESSIVO
+   ========================================================= */
+
+document.addEventListener("keydown", (e) => {
+
+    // solo tasto INVIO
+    if (e.key !== "Enter") return;
+
+    // solo campi input del magazzino
+    const isCampoMagazzino =
+        e.target.classList.contains("input-gestionale");
+
+    if (!isCampoMagazzino) return;
+
+    e.preventDefault(); // evita submit o click bottone
+
+    // tutti i campi del form magazzino, in ordine DOM
+    const campi = Array.from(
+        document.querySelectorAll(
+            "#viewMagazzino .input-gestionale"
+        )
+    );
+
+    const index = campi.indexOf(e.target);
+    if (index === -1) return;
+
+    const prossimo = campi[index + 1];
+
+    if (prossimo) {
+        prossimo.focus();
+    }
+});

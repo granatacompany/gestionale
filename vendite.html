@@ -29,20 +29,26 @@
 <div class="content">
 
         <h1>Vendite (Cassa)</h1>
+<!-- TOGGLE VENDITE / STORICO -->
+<div style="margin-bottom: 20px; display:flex; gap:10px; align-items:center;">
 
-        <!-- TOGGLE MODALITÀ -->
-        <div style="margin-bottom: 20px; display:flex; gap:10px; align-items:center;">
-            
-            <button id="btnChiusuraGiornaliera" class="toggle-rapido">
-                Chiusura giornaliera
-            </button>
+    <button id="toggleVenditaTipo" class="toggle-rapido">
+        ENTRATA
+    </button>
 
-            <button id="toggleVenditaTipo" class="toggle-rapido">
-                ENTRATA
-            </button>
+    <button id="toggleVenditeAperteTab" class="toggle-rapido attivo">
+        VENDITE DA CONCLUDERE
+    </button>
 
-        </div>
+    <button id="toggleVenditeStoricoTab" class="toggle-rapido">
+        STORICO VENDITE
+    </button>
 
+    <button id="btnChiusuraGiornaliera" class="toggle-rapido">
+        Chiusura giornaliera
+    </button>
+    
+</div>
 
     <!-- FORM -->
     <div class="form-container preventivi">
@@ -85,8 +91,10 @@
 
 </div>
 
-<h2>Vendite da concludere</h2>
 
+<!-- VIEW VENDITE DA CONCLUDERE -->
+<div id="viewVenditeAperte">
+<h2>Vendite da concludere</h2>
 <table id="tabDaConcludere">
     <thead>
         <tr>
@@ -99,11 +107,25 @@
     </thead>
     <tbody></tbody>
 </table>
+</div>
 
 
     
 
+    
+<!-- VIEW STORICO VENDITE -->
+<div id="viewVenditeStorico" style="display:none;">
     <h2>Movimenti</h2>
+    <!-- ===============================
+     FILTRI STORICO VENDITE
+     =============================== -->
+<div id="filtriStoricoVendite" style="display:flex; margin: 20px 0; gap: 10px;">
+    <button type="button" class="btn-filtro-vendite" data-filtro="tutte">Tutte</button>
+    <button type="button" class="btn-filtro-vendite" data-filtro="oggi">Oggi</button>
+    <button type="button" class="btn-filtro-vendite" data-filtro="7gg">7 GG</button>
+    <button type="button" class="btn-filtro-vendite" data-filtro="mese">Mese</button>
+
+</div>
 
     <table id="tabVendite">
         <thead>

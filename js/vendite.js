@@ -5,6 +5,7 @@
 let tipoVendita = "entrata"; // "entrata" (default) | "uscita"
 let riparazioneIncassoSelezionata = null;
 let saldoDaIncassare = 0;
+let filtroStoricoVendite = "tutte"; // oggi | 7gg | mese
 
 /* =========================================================
    AVVIO PAGINA
@@ -17,9 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initInvioCampiVendite();
     renderVendite();
     renderVenditeDaConcludere();
-
     initAutofillImportoDaMagazzinoVendite();
-
+    initFiltriStoricoVendite();
     
 const btnChiusura = document.getElementById("btnChiusuraGiornaliera");
 if (btnChiusura) {
@@ -197,10 +197,45 @@ function renderVendite() {
     const tbody = document.querySelector("#tabVendite tbody");
     if (!tbody) return;
 
+     // reset TOTALE tabella (fondamentale)
     tbody.innerHTML = "";
 
-    vendite.forEach(v => {
-        const tr = document.createElement("tr");
+    
+
+      vendite  
+        .filter(v => v.tipo === "entrata")
+            .filter(v => {
+
+                if (filtroStoricoVendite === "tutte") {
+                    return true;
+                }
+
+                const oggi = new Date();
+                oggi.setHours(0,0,0,0);
+
+                const dataVendita = new Date(v.data);
+                dataVendita.setHours(0,0,0,0);
+
+                if (filtroStoricoVendite === "oggi") {
+                    return dataVendita.getTime() === oggi.getTime();
+                }
+
+                if (filtroStoricoVendite === "7gg") {
+                    const diff = (oggi - dataVendita) / (1000 * 60 * 60 * 24);
+                    return diff >= 0 && diff <= 6;
+                }
+
+                if (filtroStoricoVendite === "mese") {
+                    return (
+                        dataVendita.getMonth() === oggi.getMonth() &&
+                        dataVendita.getFullYear() === oggi.getFullYear()
+                    );
+                }
+
+                return true;
+            })
+            .forEach(v => {
+                const tr = document.createElement("tr");
 
         tr.innerHTML = `
             <td>${v.data || "-"}</td>
@@ -212,6 +247,7 @@ function renderVendite() {
 
         tbody.appendChild(tr);
     });
+       
 }
 
 /* =========================================================
@@ -600,4 +636,63 @@ function scaricaMagazzinoDaVendita(codicePossibile) {
 
     localStorage.setItem("magazzino", JSON.stringify(magazzino));
     localStorage.setItem("movimentiMagazzino", JSON.stringify(movimenti));
+}
+/* =========================================================
+   TOGGLE VENDITE / STORICO
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btnAperte = document.getElementById("toggleVenditeAperteTab");
+    const btnStorico = document.getElementById("toggleVenditeStoricoTab");
+
+    const viewAperte = document.getElementById("viewVenditeAperte");
+    const viewStorico = document.getElementById("viewVenditeStorico");
+
+    if (!btnAperte || !btnStorico || !viewAperte || !viewStorico) return;
+
+    // stato iniziale
+    btnAperte.classList.add("attivo");
+    btnStorico.classList.remove("attivo");
+    viewAperte.style.display = "block";
+    viewStorico.style.display = "none";
+
+    btnAperte.onclick = () => {
+        btnAperte.classList.add("attivo");
+        btnStorico.classList.remove("attivo");
+        viewAperte.style.display = "block";
+        viewStorico.style.display = "none";
+        document.getElementById("filtriStoricoVendite").style.display = "none";
+
+    };
+
+    btnStorico.onclick = () => {
+        btnStorico.classList.add("attivo");
+        btnAperte.classList.remove("attivo");
+        viewAperte.style.display = "none";
+        viewStorico.style.display = "block";
+        document.getElementById("filtriStoricoVendite").style.display = "flex";
+
+    };
+});
+
+/* =========================================================
+   FILTRI STORICO VENDITE
+   ========================================================= */
+function initFiltriStoricoVendite() {
+
+    const btns = document.querySelectorAll(".btn-filtro-vendite");
+    if (!btns.length) return;
+
+    btns.forEach(btn => {
+        btn.onclick = () => {
+
+            filtroStoricoVendite = btn.dataset.filtro;
+
+            btns.forEach(b => b.classList.remove("attivo"));
+            btn.classList.add("attivo");
+
+            renderVendite(); // 🔁 un solo render
+        };
+    });
 }

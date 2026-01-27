@@ -24,39 +24,65 @@
 
     <h1>Ordini ricambi</h1>
 
-    <h2>Ordini aperti</h2>
-    <table id="tabOrdini">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Preventivo</th>
-                <th>Ricambio</th>
-                <th>gg</th>
-                <th>Consegna prevista</th>
-                <th>Link</th>
-                <th>Stato</th>
-                <th>Arrivato</th>
-            </tr>
-        </thead>
-
-        <tbody></tbody>
-    </table>
-
-    <h2>Storico ordini</h2>
-    <table id="tabOrdiniStorico">
-        <thead>
-            <tr>
-                <th>Data arrivo</th>
-                <th>ID</th>
-                <th>Preventivo</th>
-                <th>Ricambio</th>
-                <th>Link</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
+<!-- TOGGLE ORDINI / STORICO -->
+<div style="margin-bottom: 20px; display:flex; gap:10px; align-items:center;">
+    <button id="toggleOrdiniApertiTab" class="toggle-rapido attivo">
+        ORDINI APERTI
+    </button>
+    <button id="toggleOrdiniStoricoTab" class="toggle-rapido">
+        STORICO ORDINI
+    </button>
 </div>
+
+
+
+
+        <!-- ===============================
+            ORDINI APERTI
+            =============================== -->
+        <div id="viewOrdiniAperti">
+
+            
+            <table id="tabOrdini">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Preventivo</th>
+                        <th>Ricambio</th>
+                        <th>gg</th>
+                        <th>Consegna prevista</th>
+                        <th>Link</th>
+                        <th>Stato</th>
+                        <th>Arrivato</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+        </div>
+
+        <!-- ===============================
+            STORICO ORDINI
+            =============================== -->
+        <div id="viewOrdiniStorico" style="display:none;">
+
+            
+            <table id="tabOrdiniStorico">
+                <thead>
+                    <tr>
+                        <th>Data arrivo</th>
+                        <th>ID</th>
+                        <th>Preventivo</th>
+                        <th>Ricambio</th>
+                        <th>Link</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+        </div>
+</div>
+
 
 <script src="js/script.js"></script>
 <script src="js/ordini.js"></script>

@@ -26,9 +26,20 @@
 
     <h1>Riparazioni</h1>
 
+    <!-- TOGGLE RIPARAZIONI / STORICO -->
+<div style="margin-bottom: 20px; display:flex; gap:10px; align-items:center;">
+    <button id="toggleRiparazioniTab" class="toggle-rapido attivo">
+        RIPARAZIONI IN CORSO
+    
+    </button>
+    <button id="toggleStoricoRiparazioniTab" class="toggle-rapido">
+        STORICO RIPARAZIONI
+    </button>
+</div>
     
 
-    <!-- TABELLA RIPARAZIONI -->
+<!-- VIEW RIPARAZIONI ATTIVE -->
+<div id="viewRiparazioniAttive">
     <table id="tabRiparazioni">
         <thead>
             <tr>
@@ -42,23 +53,25 @@
         </thead>
         <tbody></tbody>
     </table>
-
-
-
-<h2>Storico riparazioni</h2>
-
-<table id="tabRiparazioniStorico">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Descrizione</th>
-            <th>Data fine</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
 </div>
+
+<!-- VIEW STORICO RIPARAZIONI -->
+<div id="viewRiparazioniStorico" style="display:none;">
+    
+
+    <table id="tabRiparazioniStorico">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Descrizione</th>
+                <th>Data fine</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
 <!-- SCRIPT GLOBALI -->
 <script src="js/script.js"></script>
 

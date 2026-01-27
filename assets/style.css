@@ -431,6 +431,46 @@ tr.selected {
 .autocomplete-item.active {
     background-color: #f0f6ff;
 }
+
+/* =========================================================
+   AUTOCOMPLETE CODICE MAGAZZINO - PREVENTIVI
+   ========================================================= */
+   
+/* Ricambio riconosciuto da magazzino */
+.riga-ricambio.magazzino-ok {
+    background-color: #e9f8ee;
+    border-left: 4px solid #2ecc71;
+    transition: background-color 0.3s;
+}
+
+.autocomplete-ricambi {
+    position: absolute;
+    top: 110%;
+    left: 285px;  /* allinea a destra del campo */
+    right: 0;
+
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+
+    max-height: 180px;
+    overflow-y: auto;
+
+    z-index: 9999;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
+.autocomplete-ricambi .item {
+    padding: 12px 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.autocomplete-ricambi .item:hover {
+    background-color: #f2f6ff;
+}
+
+
 /* =========================================================
    PREVENTIVI - COLONNA ACCETTATO CENTRATA
    ========================================================= */
@@ -576,3 +616,27 @@ button[disabled] {
     background: #43a047;
 }
 
+/* =========================================================
+   PREVENTIVI – BASE PER AUTOCOMPLETE RICAMBI
+   (serve per ancorare la tendina sotto al campo)
+   ========================================================= */
+
+.riga-ricambio {
+    position: relative;
+}
+
+/* ===============================
+   FILTRI STORICO VENDITE
+   =============================== */
+
+.btn-filtro-vendite {
+    background: #4CAF50;
+    color: white;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: bold;
+}
+
+.btn-filtro-vendite.attivo {
+    background: #2e7d32; /* verde più scuro */
+}

@@ -120,3 +120,37 @@ function terminaRiparazione(id) {
     localStorage.setItem("riparazioni", JSON.stringify(riparazioni));
     renderRiparazioni();
 }
+/* =========================================================
+   TOGGLE RIPARAZIONI / STORICO
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btnAttive = document.getElementById("toggleRiparazioniTab");
+    const btnStorico = document.getElementById("toggleStoricoRiparazioniTab");
+
+    const viewAttive = document.getElementById("viewRiparazioniAttive");
+    const viewStorico = document.getElementById("viewRiparazioniStorico");
+
+    if (!btnAttive || !btnStorico || !viewAttive || !viewStorico) return;
+
+    // stato iniziale
+    btnAttive.classList.add("attivo");
+    btnStorico.classList.remove("attivo");
+    viewAttive.style.display = "block";
+    viewStorico.style.display = "none";
+
+    btnAttive.onclick = () => {
+        btnAttive.classList.add("attivo");
+        btnStorico.classList.remove("attivo");
+        viewAttive.style.display = "block";
+        viewStorico.style.display = "none";
+    };
+
+    btnStorico.onclick = () => {
+        btnStorico.classList.add("attivo");
+        btnAttive.classList.remove("attivo");
+        viewAttive.style.display = "none";
+        viewStorico.style.display = "block";
+    };
+});

@@ -132,3 +132,37 @@ function aggiornaRiparazioniDaOrdini() {
 
     localStorage.setItem("riparazioni", JSON.stringify(riparazioni));
 }
+/* =========================================================
+   TOGGLE ORDINI / STORICO
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btnAperti = document.getElementById("toggleOrdiniApertiTab");
+    const btnStorico = document.getElementById("toggleOrdiniStoricoTab");
+
+    const viewAperti = document.getElementById("viewOrdiniAperti");
+    const viewStorico = document.getElementById("viewOrdiniStorico");
+
+    if (!btnAperti || !btnStorico || !viewAperti || !viewStorico) return;
+
+    // stato iniziale
+    btnAperti.classList.add("attivo");
+    btnStorico.classList.remove("attivo");
+    viewAperti.style.display = "block";
+    viewStorico.style.display = "none";
+
+    btnAperti.onclick = () => {
+        btnAperti.classList.add("attivo");
+        btnStorico.classList.remove("attivo");
+        viewAperti.style.display = "block";
+        viewStorico.style.display = "none";
+    };
+
+    btnStorico.onclick = () => {
+        btnStorico.classList.add("attivo");
+        btnAperti.classList.remove("attivo");
+        viewAperti.style.display = "none";
+        viewStorico.style.display = "block";
+    };
+});

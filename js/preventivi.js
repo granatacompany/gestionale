@@ -3,7 +3,7 @@
    ========================================================= */
 
         let previewPreventivoId = null;
-
+        
         let preventivoAccontoId = null;
 
 
@@ -116,6 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const wrapper = document.getElementById("ricambiWrapper");
     if (!wrapper) return;
 
+    
+
     /* click gestito sul wrapper: funziona anche dopo reset/innerHTML */
     wrapper.addEventListener("click", (e) => {
 
@@ -132,53 +134,143 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
     });
-        // quando l’operatore esce dal campo link/codice: se è un codice di magazzino → autofill prezzo
-           wrapper.addEventListener("change", (e) => {
+    
+// quando l’operatore esce dal campo link/codice: se è un codice di magazzino → autofill prezzo
+    wrapper.addEventListener("change", (e) => {
 
-                const riga = e.target.closest(".riga-ricambio");
-                if (!riga) return;
+        const riga = e.target.closest(".riga-ricambio");
+        if (!riga) return;
+
+        const inputs = riga.querySelectorAll("input");
+        if (inputs.length < 3) return;
+
+        // Il campo "link/codice" è SEMPRE il secondo input della riga
+        const inputLinkCodice = inputs[1];
+
+        // Se l’evento non arriva da quel campo, esci
+        if (e.target !== inputLinkCodice) return;
+
+        const valore = inputLinkCodice.value.trim();
+        if (!valore) {
+            delete inputLinkCodice.dataset.codiceMagazzino;
+            return;
+        }
+
+        const magazzino = JSON.parse(localStorage.getItem("magazzino")) || [];
+        const articolo = magazzino.find(a => a.codice === valore);
+
+        // Se non è un codice magazzino, può essere un link: NON tocchiamo nulla
+        if (!articolo) {
+            delete inputLinkCodice.dataset.codiceMagazzino;
+            return;
+        }
+
+        const inputDescr = inputs[0];
+        const inputPrezzo = inputs[2];
+
+        // descrizione solo se vuota
+        if (inputDescr && !inputDescr.value.trim()) {
+            inputDescr.value = articolo.descrizione;
+        }
+
+        // prezzo sempre dal magazzino
+        if (inputPrezzo) {
+            inputPrezzo.value = Number(articolo.valore || 0).toFixed(2);
+
+            // 🔁 forza evento input per aggiornare il totale automatico
+            inputPrezzo.dispatchEvent(new Event("input", { bubbles: true }));
+
+        }
+
+        // marca come magazzino (serve poi per scarico e per NON aprire link in accettazione)
+        inputLinkCodice.dataset.codiceMagazzino = articolo.codice;
+
+        // 🔁 forza ricalcolo totale
+        if (!document.getElementById("btnRapido")?.classList.contains("attivo")) {
+            calcolaTotale();
+        }
+    });
+/* =========================================================
+   AUTOCOMPLETE RICAMBI DA MAGAZZINO + HIGHLIGHT
+   ========================================================= */
+
+    if (!wrapper) return;
+
+    wrapper.addEventListener("input", (e) => {
+
+        if (!e.target.classList.contains("ricambio-link-codice")) return;
+
+        const input = e.target;
+        const riga = input.closest(".riga-ricambio");
+        if (!riga) return;
+
+        // rimuovi menu esistente
+        riga.querySelector(".autocomplete-ricambi")?.remove();
+
+        const valore = input.value.trim().toLowerCase();
+        if (valore.length < 2) return;
+
+        const magazzino = JSON.parse(localStorage.getItem("magazzino")) || [];
+
+        const risultati = magazzino.filter(a =>
+            a.codice.toLowerCase().includes(valore) ||
+            a.descrizione.toLowerCase().includes(valore)
+        ).slice(0, 5);
+
+        if (risultati.length === 0) return;
+
+        const box = document.createElement("div");
+        box.className = "autocomplete-ricambi";
+
+        risultati.forEach(a => {
+
+            const div = document.createElement("div");
+            div.className = "item";
+            div.innerHTML = `<strong>${a.codice}</strong> – ${a.descrizione} (q.tà ${a.quantita})`;
+
+            div.onmousedown = () => {
+                input.value = a.codice;
+                input.dataset.codiceMagazzino = a.codice;
 
                 const inputs = riga.querySelectorAll("input");
-                if (inputs.length < 3) return;
-
-                // Il campo "link/codice" è SEMPRE il secondo input della riga
-                const inputLinkCodice = inputs[1];
-
-                // Se l’evento non arriva da quel campo, esci
-                if (e.target !== inputLinkCodice) return;
-
-                const valore = inputLinkCodice.value.trim();
-                if (!valore) {
-                    delete inputLinkCodice.dataset.codiceMagazzino;
-                    return;
-                }
-
-                const magazzino = JSON.parse(localStorage.getItem("magazzino")) || [];
-                const articolo = magazzino.find(a => a.codice === valore);
-
-                // Se non è un codice magazzino, può essere un link: NON tocchiamo nulla
-                if (!articolo) {
-                    delete inputLinkCodice.dataset.codiceMagazzino;
-                    return;
-                }
-
                 const inputDescr = inputs[0];
                 const inputPrezzo = inputs[2];
 
-                // descrizione solo se vuota
                 if (inputDescr && !inputDescr.value.trim()) {
-                    inputDescr.value = articolo.descrizione;
+                    inputDescr.value = a.descrizione;
                 }
 
-                // prezzo sempre dal magazzino
                 if (inputPrezzo) {
-                    inputPrezzo.value = Number(articolo.valore || 0).toFixed(2);
+                    inputPrezzo.value = Number(a.valore || 0).toFixed(2);
+                    inputPrezzo.dispatchEvent(new Event("input", { bubbles: true }));
                 }
 
-                // marca come magazzino (serve poi per scarico e per NON aprire link in accettazione)
-                inputLinkCodice.dataset.codiceMagazzino = articolo.codice;
-            });
+                // highlight visivo
+                riga.classList.add("magazzino-ok");
+                setTimeout(() => riga.classList.remove("magazzino-ok"), 1500);
 
+                box.remove();
+            };
+
+            box.appendChild(div);
+        });
+
+            // posizionamento corretto
+            
+            riga.appendChild(box);
+
+    });
+
+    // click fuori → chiudi autocomplete
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(".autocomplete-ricambi")) {
+            document.querySelectorAll(".autocomplete-ricambi").forEach(b => b.remove());
+        }
+    });
+
+
+
+    
 
 
 });
@@ -251,9 +343,6 @@ function calcolaTotale() {
 
     totaleInput.value = totaleFinale.toFixed(2);
 }
-
-
-
 
     // EVENTI
     manodoperaInput.addEventListener("input", calcolaTotale);
@@ -548,7 +637,14 @@ function salvaPreventivo() {
 
     // salva solo se almeno un campo è compilato
     if (descr || link || prezzo > 0 || leadTime > 0) {
-        const codiceMagazzino = riga.querySelectorAll("input")[1].dataset.codiceMagazzino || null;
+        const inputLink = riga.querySelectorAll("input")[1];
+
+        const codiceMagazzino =
+            inputLink && inputLink.dataset && inputLink.dataset.codiceMagazzino
+                ? inputLink.dataset.codiceMagazzino
+                : null;
+
+
         ricambi.push({
             descrizione: descr,
             link: link,
@@ -707,7 +803,7 @@ function renderPreventivi() {
         // =========================
         // PREVENTIVI ATTIVI
         // =========================
-        if (!p.accettato) {
+        if (!p.accettato && !p.rifiutato) {
 
             const ricambiDescr = (p.ricambi || [])
             .map(r => r.descrizione)
@@ -941,6 +1037,9 @@ function getStatoPreventivo(p) {
 
     if (p.accettato) return "Accettato";
 
+    // 🔴 rifiuto manuale
+    if (p.rifiutato) return "Rifiutato";
+
     const oggi = new Date();
     const dataPreventivo = new Date(p.data);
 
@@ -949,6 +1048,7 @@ function getStatoPreventivo(p) {
 
     return diffGiorni > 3 ? "Rifiutato" : "In attesa";
 }
+
 
 /* =========================================================
    PREVIEW PREVENTIVO (LEGGE DAL LOCALSTORAGE)
@@ -1093,15 +1193,22 @@ function creaRiparazioneDaPreventivo(p) {
 
     const id = "R-" + String(riparazioni.length + 1).padStart(4, "0");
 
-    riparazioni.push({
-        id: id,
-        preventivoId: p.id,
-        clienteCodice: p.clienteCodice,
-        descrizione: p.descrizione,
-        stato: "in_attesa_ricambi",
-        avviabile: false,
-        dataCreazione: new Date().toISOString().slice(0,10)
-    });
+        // se esiste almeno un ricambio NON da magazzino → riparazione bloccata
+        const deveAttendereRicambi = (p.ricambi || []).some(r =>
+            !r.codiceMagazzino && (r.descrizione || "").trim() !== ""
+        );
+
+        riparazioni.push({
+            id: id,
+            preventivoId: p.id,
+            clienteCodice: p.clienteCodice,
+            descrizione: p.descrizione,
+            stato: deveAttendereRicambi ? "in_attesa_ricambi" : "pronta",
+            avviabile: !deveAttendereRicambi,
+            elapsedMs: 0,
+            startTime: null,
+            dataCreazione: new Date().toISOString().slice(0,10)
+        });
 
     localStorage.setItem("riparazioni", JSON.stringify(riparazioni));
 }
@@ -1118,24 +1225,27 @@ function creaOrdiniDaPreventivo(p) {
 
     p.ricambi.forEach(r => {
 
+        // ✅ se viene dal magazzino, NON creare ordine
+        if (r.codiceMagazzino) return;
+
         if (!r.descrizione) return;
 
-        // 🔒 DEDUPE: evita duplicati stesso preventivo + descrizione
-        const esisteGia = ordini.some(o =>
-            o.preventivoId === p.id &&
-            (o.descrizione || "").trim().toLowerCase() === r.descrizione.trim().toLowerCase()
-        );
+            // 🔒 DEDUPE: evita duplicati stesso preventivo + descrizione
+            const esisteGia = ordini.some(o =>
+                o.preventivoId === p.id &&
+                (o.descrizione || "").trim().toLowerCase() === r.descrizione.trim().toLowerCase()
+            );
 
-        if (esisteGia) return;
+            if (esisteGia) return;
 
-        ordini.push({
-            id: "O-" + String(ordini.length + 1).padStart(4, "0"),
-            preventivoId: p.id,
-            descrizione: r.descrizione,
-            link: r.link || "",
-            arrivato: false
+            ordini.push({
+                id: "O-" + String(ordini.length + 1).padStart(4, "0"),
+                preventivoId: p.id,
+                descrizione: r.descrizione,
+                link: r.link || "",
+                arrivato: false
+            });
         });
-    });
 
     localStorage.setItem("ordini", JSON.stringify(ordini));
 }
@@ -1183,9 +1293,10 @@ function caricaPreventivoPerDuplicazione(idPreventivo) {
             const riga = document.createElement("div");
             riga.className = "riga-ricambio";
 
+
             riga.innerHTML = `
                 <input type="text" class="input-gestionale" value="${r.descrizione || ""}">
-                <input type="url" class="input-gestionale" value="${r.link || ""}">
+                <input type="text" class="input-gestionale ricambio-link-codice" value="${r.link || ""}">
                 <input type="number" class="input-gestionale" value="${r.prezzo || ""}" min="0" step="0.01">
                 <input type="number" class="input-gestionale" value="${r.leadTime || ""}" min="0" step="1">
                 ${
@@ -1194,6 +1305,13 @@ function caricaPreventivoPerDuplicazione(idPreventivo) {
                         : `<button type="button" class="btn-remove-ricambio">−</button>`
                 }
             `;
+            
+            // 🔑 RIPRISTINO CODICE MAGAZZINO (fondamentale per scarico futuro)
+                const inputLink = riga.querySelector(".ricambio-link-codice");
+                if (r.codiceMagazzino && inputLink) {
+                    inputLink.dataset.codiceMagazzino = r.codiceMagazzino;
+                }
+
 
 
 
@@ -1281,7 +1399,7 @@ function caricaPreventivoPerModifica(idPreventivo) {
 
             riga.innerHTML = `
                 <input type="text" class="input-gestionale" value="${r.descrizione || ""}">
-                <input type="url" class="input-gestionale" value="${r.link || ""}">
+                <input type="text" class="input-gestionale ricambio-link-codice" value="${r.link || ""}">
                 <input type="number" class="input-gestionale" value="${r.prezzo || ""}" min="0" step="0.01">
                 <input type="number" class="input-gestionale" value="${r.leadTime ?? ""}" min="0" step="1">
                 ${
@@ -1346,23 +1464,25 @@ function eliminaPreventivoAttivo() {
 
     if (!preventivoInModificaId) return;
 
-    if (!confirm("Vuoi eliminare questo preventivo?")) return;
+    if (!confirm("Vuoi segnare questo preventivo come RIFIUTATO?")) return;
 
     const preventivi = JSON.parse(localStorage.getItem("preventivi")) || [];
 
-    const index = preventivi.findIndex(p => p.id === preventivoInModificaId);
-    if (index === -1) return;
+    const p = preventivi.find(p => p.id === preventivoInModificaId);
+    if (!p) return;
 
-    /* elimina preventivo */
-    preventivi.splice(index, 1);
+    // 🔴 soft delete → rifiutato
+    p.rifiutato = true;
+    p.dataRifiuto = new Date().toISOString().slice(0, 10);
+
     localStorage.setItem("preventivi", JSON.stringify(preventivi));
 
-    /* reset stato */
     preventivoInModificaId = null;
 
     resetFormPreventivo();
     renderPreventivi();
 }
+
 function apriModalAcconto(p) {
 
     preventivoAccontoId = p.id;
@@ -1519,3 +1639,37 @@ function scaricaMagazzinoDaPreventivo(preventivo) {
     localStorage.setItem("magazzino", JSON.stringify(magazzino));
     localStorage.setItem("movimentiMagazzino", JSON.stringify(movimenti));
 }
+/* =========================================================
+   TOGGLE PREVENTIVI / STORICO
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btnAttivi = document.getElementById("togglePreventiviAttiviTab");
+    const btnStorico = document.getElementById("togglePreventiviStoricoTab");
+
+    const viewAttivi = document.getElementById("viewPreventiviAttivi");
+    const viewStorico = document.getElementById("viewPreventiviStorico");
+
+    if (!btnAttivi || !btnStorico || !viewAttivi || !viewStorico) return;
+
+    // stato iniziale
+    btnAttivi.classList.add("attivo");
+    btnStorico.classList.remove("attivo");
+    viewAttivi.style.display = "block";
+    viewStorico.style.display = "none";
+
+    btnAttivi.onclick = () => {
+        btnAttivi.classList.add("attivo");
+        btnStorico.classList.remove("attivo");
+        viewAttivi.style.display = "block";
+        viewStorico.style.display = "none";
+    };
+
+    btnStorico.onclick = () => {
+        btnStorico.classList.add("attivo");
+        btnAttivi.classList.remove("attivo");
+        viewAttivi.style.display = "none";
+        viewStorico.style.display = "block";
+    };
+});
