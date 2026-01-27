@@ -640,3 +640,232 @@ button[disabled] {
 .btn-filtro-vendite.attivo {
     background: #2e7d32; /* verde più scuro */
 }
+
+/* =====================================================
+   DASHBOARD / GESTIONALE – PALETTE PROFESSIONALE
+   ===================================================== */
+   /* =====================================================
+   DASHBOARD – ALLINEAMENTO TESTI E MARGINI
+   ===================================================== */
+
+/* CARD: padding coerente su tutte */
+.card {
+    padding: 20px 24px;
+}
+
+/* Titoli card: allineamento pulito */
+.card h3 {
+    margin: 0 0 10px 0;
+    line-height: 1.25;
+}
+
+/* KPI: stesso asse del titolo */
+.kpi {
+    margin: 0;
+    padding: 0;
+    line-height: 1.1;
+}
+
+/* Contenuto dashboard: respiro dai bordi */
+.content {
+    padding: 24px 28px;
+}
+
+/* ATTIVITÀ URGENTI – righe ordinate */
+.list .row {
+    padding: 10px 14px;
+    align-items: center;
+}
+
+/* Testo centrale non deve "scappare" */
+.list .row span {
+    display: block;
+    flex: 1;
+}
+
+
+/* === BASE === */
+body {
+    background-color: #f4f6f8;   /* grigio SaaS */
+    color: #1f2937;              /* quasi nero */
+}
+
+/* === SIDEBAR === */
+.sidebar {
+    background-color: #0b1220;   /* blu notte */
+}
+
+.sidebar h2 {
+    color: #ffffff;
+}
+
+.sidebar a {
+    color: #c7d2fe;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background-color: #1e293b;
+    color: #ffffff;
+}
+
+/* === CONTENUTO === */
+.content {
+    background-color: transparent;
+}
+
+/* === CARD === */
+.card {
+    background-color: #ffffff;
+    color: #1f2937;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+/* Titoli card */
+.card h3 {
+    color: #6b7280;
+    font-weight: 600;
+}
+
+/* === KPI === */
+.kpi {
+    color: #111827;
+}
+
+.kpi.ok {
+    color: #16a34a;  /* verde elegante */
+}
+
+.kpi.warn {
+    color: #ca8a04;  /* ambra soft */
+}
+
+.kpi.bad {
+    color: #dc2626;  /* rosso serio */
+}
+
+/* === ATTIVITÀ URGENTI === */
+.list .row {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.list .row:hover {
+    background-color: #f3f4f6;
+}
+
+/* Badge */
+.badge {
+    font-weight: 600;
+}
+
+/* Stato */
+.b-green {
+    background-color: #e7f8ef;
+    color: #166534;
+}
+
+.b-amber {
+    background-color: #fff4e5;
+    color: #92400e;
+}
+
+.b-red {
+    background-color: #fdecec;
+    color: #991b1b;
+}
+
+/* Link */
+.row a {
+    color: #2563eb;
+    font-weight: 500;
+}
+
+.row a:hover {
+    text-decoration: underline;
+}
+
+/* === GRAFICO === */
+canvas {
+    background-color: transparent;
+}
+
+/* === STATO OPERATIVO === */
+#opMagazzino,
+#opTempo,
+#opAccettazione,
+#opClienti {
+    color: #111827;
+}
+
+/* === SUGGERIMENTI === */
+#suggerimenti div {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+/* =====================================================
+   DASHBOARD – LAYOUT (STRUTTURA, NO COLORI)
+   ===================================================== */
+
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+}
+
+.chart-wrap {
+    height: 260px;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.kpi {
+    font-size: 28px;
+    font-weight: 700;
+}
+/* === KPI – gerarchia moderna === */
+.card .kpi {
+    font-size: 32px;
+    letter-spacing: -0.5px;
+}
+
+.card h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.card {
+    border-radius: 14px;
+    box-shadow:
+        0 1px 2px rgba(0,0,0,0.04),
+        0 6px 18px rgba(0,0,0,0.06);
+}
+.list .row {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.list .row:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+.badge {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+}

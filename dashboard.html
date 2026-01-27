@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="assets/style.css">
+
 </head>
 <body>
 
@@ -17,22 +18,83 @@
     <a href="riparazioni.html">Riparazioni</a>
     <a href="ordini.html">Ordini</a>
     <a href="vendite.html">Vendite</a>
-    
 </div>
 
 <div class="content">
-    <h1>Benvenuto nel Gestionale</h1>
+    <h1>Dashboard</h1>
 
-    <div class="cards">
-        <div class="card">Clienti registrati: <b>124</b></div>
-        <div class="card">Prodotti in magazzino: <b>312</b></div>
-        <div class="card">Riparazioni attive: <b>8</b></div>
+    <div class="dash-grid">
+
+        <!-- KPI -->
+        <div class="card" style="grid-column:span 4">
+            <h3>Incasso del mese</h3>
+            <div id="kpiIncassoMese" class="kpi ok">€ 0,00</div>
+        </div>
+
+        <div class="card" style="grid-column:span 4">
+            <h3>Preventivi aperti</h3>
+            <div id="kpiPreventiviAperti" class="kpi warn">0</div>
+        </div>
+
+        <div class="card" style="grid-column:span 4">
+            <h3>Riparazioni attive</h3>
+            <div id="kpiRiparazioniAttive" class="kpi">0</div>
+        </div>
+
+        <!-- ATTIVITÀ URGENTI -->
+        <div class="card" style="grid-column:span 6">
+            <h3>Attività urgenti</h3>
+            <div id="attivitaUrgenti" class="list"></div>
+        </div>
+
+        <!-- ANDAMENTO ECONOMICO -->
+        <div class="card" style="grid-column:span 6">
+            <h3>Andamento economico</h3>
+            <div class="chart-wrap">
+                <canvas id="chartIncassi"></canvas>
+            </div>
+        </div>
+
+        <!-- STATO OPERATIVO -->
+        <div class="card" style="grid-column:span 12">
+            <h3>Stato operativo sintetico</h3>
+            <div class="dash-grid">
+
+                <div class="card" style="grid-column:span 3">
+                    <h3>Magazzino sotto scorta</h3>
+                    <div id="opMagazzino" class="kpi bad">0</div>
+                </div>
+
+                <div class="card" style="grid-column:span 3">
+                    <h3>Tempo medio riparazioni</h3>
+                    <div id="opTempo" class="kpi">0 h</div>
+                </div>
+
+                <div class="card" style="grid-column:span 3">
+                    <h3>% accettazione preventivi</h3>
+                    <div id="opAccettazione" class="kpi">0%</div>
+                </div>
+
+                <div class="card" style="grid-column:span 3">
+                    <h3>Nuovi clienti mese</h3>
+                    <div id="opClienti" class="kpi">0</div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SUGGERIMENTI -->
+        <div class="card" style="grid-column:span 12">
+            <h3>Suggerimenti</h3>
+            <div id="suggerimenti" class="list"></div>
+        </div>
+
     </div>
 </div>
 
-<!-- SCRIPT GLOBALI -->
 <script src="js/script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/dashboard.js"></script>
 
-<!-- SCRIPT DELLA PAGINA -->
 </body>
 </html>
