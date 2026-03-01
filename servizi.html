@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Servizi</title>
+  <link rel="stylesheet" href="assets/style.css" />
+
+  <style>
+    /* piccoli aggiustamenti SOLO per questa pagina (no rivoluzioni) */
+    .servizi-box {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .check-grid {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .check-row input[type="text"] {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .filters-row {
+      max-width: 900px;
+      margin: 0 auto 14px auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .badge-mini {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #f3f4f6;
+      color: #111827;
+      margin-left: 8px;
+    }
+
+    .cell-servizio {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar">
+    <h2>Spazioexe</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="clienti.html">Clienti</a>
+    <a href="magazzino.html">Magazzino</a>
+    <a href="preventivi.html">Preventivi</a>
+    <a href="riparazioni.html">Riparazioni</a>
+    <a href="ordini.html">Ordini</a>
+    <a href="vendite.html">Vendite</a>
+    <a href="servizi.html">Servizi</a>
+  </div>
+
+  <div class="content">
+    <h1>Servizi</h1>
+
+    <div class="servizi-box">
+      <!-- FORM -->
+      <div class="form-container">
+        <!-- Cliente con autocomplete -->
+        <div class="autocomplete-container" style="grid-column: 1 / -1;">
+          <input
+            type="text"
+            id="srvCliente"
+            class="input-gestionale"
+            placeholder="Cliente (scrivi almeno 2 caratteri o scansiona codice)"
+            autocomplete="off"
+          />
+          <div id="autocompleteClienti" class="autocomplete-list"></div>
+        </div>
+
+        <!-- Checkbox + Compagnia -->
+        <div class="check-grid">
+          <div class="check-row">
+            <input type="checkbox" id="chkLuce" />
+            <label for="chkLuce"><strong>Luce</strong></label>
+            <input
+              type="text"
+              id="compLuce"
+              class="input-gestionale"
+              placeholder="Compagnia luce (es. Eni)"
+              disabled
+            />
+          </div>
+
+          <div class="check-row">
+            <input type="checkbox" id="chkGas" />
+            <label for="chkGas"><strong>Gas</strong></label>
+            <input
+              type="text"
+              id="compGas"
+              class="input-gestionale"
+              placeholder="Compagnia gas"
+              disabled
+            />
+          </div>
+
+          <div class="check-row">
+            <input type="checkbox" id="chkFibra" />
+            <label for="chkFibra"><strong>Fibra</strong></label>
+            <input
+              type="text"
+              id="compFibra"
+              class="input-gestionale"
+              placeholder="Compagnia fibra (es. Fastweb)"
+              disabled
+            />
+          </div>
+
+          <div class="check-row">
+            <input type="checkbox" id="chkMobile" />
+            <label for="chkMobile"><strong>Mobile</strong></label>
+            <input
+              type="text"
+              id="compMobile"
+              class="input-gestionale"
+              placeholder="Compagnia mobile (es. Vodafone)"
+              disabled
+            />
+          </div>
+        </div>
+
+        <button id="btnSalvaServizio">Salva / Modifica</button>
+      </div>
+
+      <!-- RICERCA + FILTRI -->
+      <input
+        type="text"
+        id="searchServizi"
+        class="input-gestionale"
+        placeholder="Cerca cliente..."
+        style="max-width:900px; margin: 18px auto 12px auto; display:block;"
+      />
+
+      <div class="filters-row">
+        <select id="filtroStato" class="input-gestionale">
+          <option value="tutti">Filtro: Tutti</option>
+          <option value="da_contattare">Filtro: Da contattare (rosso + giallo)</option>
+          <option value="luce">Solo Luce</option>
+          <option value="gas">Solo Gas</option>
+          <option value="fibra">Solo Fibra</option>
+          <option value="mobile">Solo Mobile</option>
+          <option value="senza_contratto">Senza contratto (rosso)</option>
+        </select>
+
+        <select id="ordineData" class="input-gestionale">
+          <option value="desc">Ordina: più recente</option>
+          <option value="asc">Ordina: meno recente</option>
+        </select>
+      </div>
+<div style="max-width:900px; margin: 12px auto 0 auto; color:#6b7280; font-size:13px;">
+        <span class="semaforo rosso"></span><span class="badge-mini">Senza contratto</span>
+        <span class="semaforo giallo" style="margin-left:14px;"></span><span class="badge-mini">Più di 10 mesi</span>
+        <span class="semaforo verde" style="margin-left:14px;"></span><span class="badge-mini">Meno di 10 mesi</span>
+      </div>
+      <!-- TABELLA -->
+      <table id="tabServizi">
+        <thead>
+          <tr>
+            <th>Stato</th>
+            <th>Cliente</th>
+            <th>Luce</th>
+            <th>Gas</th>
+            <th>Fibra</th>
+            <th>Mobile</th>
+            <th>Ultimo aggiornamento</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      
+    </div>
+  </div>
+
+  <!-- SCRIPT GLOBALI -->
+  <script src="js/script.js"></script>
+
+  <!-- SCRIPT DELLA PAGINA -->
+  <script src="js/servizi.js"></script>
+</body>
+</html>

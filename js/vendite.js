@@ -87,6 +87,8 @@ function salvaVendita() {
         const clienteInput = document.getElementById("venditaCliente");
         const descrizioneInput = document.getElementById("venditaDescrizione");
         const importoInput = document.getElementById("venditaImporto");
+        const categoriaSelect = document.getElementById("venditaCategoria");
+        const categoria = (categoriaSelect?.value || "").trim();
 
         const descrizione = (descrizioneInput?.value || "").trim();
         const importo = Number(importoInput?.value);
@@ -109,12 +111,18 @@ function salvaVendita() {
 
         const vendite = JSON.parse(localStorage.getItem("vendite")) || [];
 
+        if (!categoria) {
+            alert("Seleziona una categoria incasso (obbligatoria)");
+            return;
+            }
+
         vendite.push({
             id: "V-" + Date.now(),
             data: new Date().toISOString().slice(0, 10),
             tipo: tipoVendita, // ✅ prende il toggle (non una select inesistente)
             clienteCodice: clienteInput?.dataset.codice || "",
             descrizione: descrizione,
+            categoria: categoria,
             importo: Number(importo.toFixed(2))
         });
 
@@ -180,6 +188,9 @@ function resetVenditaForm() {
     const desc = document.getElementById("venditaDescrizione");
     if (desc) desc.value = "";
 
+    const categoriaSelect = document.getElementById("venditaCategoria");
+    if (categoriaSelect) categoriaSelect.value = "";
+
     const imp = document.getElementById("venditaImporto");
     if (imp) imp.value = "";
 
@@ -242,6 +253,7 @@ function renderVendite() {
             <td>${v.tipo === "uscita" ? "Uscita" : "Entrata"}</td>
             <td>${v.clienteCodice || "-"}</td>
             <td>${v.descrizione || "-"}</td>
+            <td>${v.categoria || "-"}</td>
             <td style="text-align:right">€ ${Number(v.importo || 0).toFixed(2)}</td>
         `;
 
@@ -468,14 +480,18 @@ function confermaIncassoSaldo() {
 
     if (!riparazioneIncassoSelezionata || saldoDaIncassare <= 0) return;
 
-    // riuso funzione già corretta
-    registraIncassoDaRiparazione(riparazioneIncassoSelezionata);
+    const cat = (document.getElementById("saldoCategoria")?.value || "").trim();
+        if (!cat) {
+        alert("Seleziona una categoria incasso (obbligatoria)");
+        return;
+        }
+        registraIncassoDaRiparazione(riparazioneIncassoSelezionata, cat);
 
     chiudiModalIncassoSaldo();
 }
 
 
-function registraIncassoDaRiparazione(r) {
+function registraIncassoDaRiparazione(r, categoria) {
 
     const preventivi = JSON.parse(localStorage.getItem("preventivi")) || [];
     const vendite = JSON.parse(localStorage.getItem("vendite")) || [];
@@ -503,6 +519,7 @@ function registraIncassoDaRiparazione(r) {
         tipo: "entrata",
         clienteCodice: r.clienteCodice || "",
         descrizione: `Saldo riparazione: ${r.descrizione}`,
+        categoria: categoria,
         importo: saldo,
         preventivoId: r.preventivoId
     });
@@ -534,10 +551,18 @@ function apriChiusuraGiornaliera() {
     const oggi = new Date().toISOString().slice(0, 10);
     const vendite = JSON.parse(localStorage.getItem("vendite")) || [];
 
+    const tot = {
+        "Z10": 0,
+        "esente": 0,
+        "pos": 0,
+        "contanti": 0,
+        "bonifico": 0,
+        "bonus docenti": 0,
+        "klarna": 0,
+        "compass": 0
+        };
+
     let totaleEntrate = 0;
-    let totaleAcconti = 0;
-    let totaleRiparazioni = 0;
-    let totaleVendite = 0;
 
     vendite.forEach(v => {
 
@@ -547,20 +572,10 @@ function apriChiusuraGiornaliera() {
         const importo = Number(v.importo) || 0;
         totaleEntrate += importo;
 
-        // RIPARAZIONE (saldo finale)
-        if ((v.descrizione || "").includes("Saldo riparazione")) {
-            totaleRiparazioni += importo;
-            return;
-        }
-
-        // ACCONTO
-        if (v.preventivoId) {
-            totaleAcconti += importo;
-            return;
-        }
-
-        // VENDITA
-        totaleVendite += importo;
+       const cat = (v.categoria || "").trim();
+            if (tot.hasOwnProperty(cat)) {
+            tot[cat] += importo;
+            }
     });
 
     // Popola UI
@@ -568,9 +583,14 @@ function apriChiusuraGiornaliera() {
         `Chiusura giornaliera – ${oggi.split("-").reverse().join("/")}`;
 
     document.getElementById("totaleEntrate").innerText = totaleEntrate.toFixed(2);
-    document.getElementById("totaleAcconti").innerText = totaleAcconti.toFixed(2);
-    document.getElementById("totaleRiparazioni").innerText = totaleRiparazioni.toFixed(2);
-    document.getElementById("totaleVendite").innerText = totaleVendite.toFixed(2);
+    document.getElementById("totZ10").innerText = tot["Z10"].toFixed(2);
+    document.getElementById("totEsente").innerText = tot["esente"].toFixed(2);
+    document.getElementById("totPos").innerText = tot["pos"].toFixed(2);
+    document.getElementById("totContanti").innerText = tot["contanti"].toFixed(2);
+    document.getElementById("totBonifico").innerText = tot["bonifico"].toFixed(2);
+    document.getElementById("totBonusDocenti").innerText = tot["bonus docenti"].toFixed(2);
+    document.getElementById("totKlarna").innerText = tot["klarna"].toFixed(2);
+    document.getElementById("totCompass").innerText = tot["compass"].toFixed(2);
 
     document.getElementById("modalChiusuraGiornaliera").style.display = "flex";
 }
@@ -581,19 +601,29 @@ function inviaChiusuraWhatsApp() {
 
     const data = document.getElementById("chiusuraData").innerText;
     const totale = document.getElementById("totaleEntrate").innerText;
-    const acconti = document.getElementById("totaleAcconti").innerText;
-    const riparazioni = document.getElementById("totaleRiparazioni").innerText;
-    const vendite = document.getElementById("totaleVendite").innerText;
+    const z10 = document.getElementById("totZ10").innerText;
+    const esente = document.getElementById("totEsente").innerText;
+    const pos = document.getElementById("totPos").innerText;
+    const contanti = document.getElementById("totContanti").innerText;
+    const bonifico = document.getElementById("totBonifico").innerText;
+    const bonus = document.getElementById("totBonusDocenti").innerText;
+    const klarna = document.getElementById("totKlarna").innerText;
+    const compass = document.getElementById("totCompass").innerText;
 
     const messaggio = `
-${data}
+    ${data}
 
-Totale entrate: € ${totale}
+    Totale entrate: € ${totale}
 
-- Acconti: € ${acconti}
-- Riparazioni: € ${riparazioni}
-- Vendite: € ${vendite}
-`.trim();
+    - Z10: € ${z10}
+    - Esente: € ${esente}
+    - POS: € ${pos}
+    - Contanti: € ${contanti}
+    - Bonifico: € ${bonifico}
+    - Bonus docenti: € ${bonus}
+    - Klarna: € ${klarna}
+    - Compass: € ${compass}
+    `.trim();
 
     const numero = "3899511899";
     const url = `https://wa.me/${numero}?text=${encodeURIComponent(messaggio)}`;

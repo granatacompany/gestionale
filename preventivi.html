@@ -21,6 +21,7 @@
     <a href="riparazioni.html">Riparazioni</a>
     <a href="ordini.html">Ordini</a>
     <a href="vendite.html">Vendite</a>
+    <a href="servizi.html">Servizi</a>
     
 </div>
 
@@ -264,13 +265,26 @@
 
     <input
       type="number"
-      id="inputAcconto"
+      
       class="input-gestionale"
       placeholder="(Acconto suggerito)"
       min="-1"
       step="0.01"
+      id="inputAcconto"
     >
 
+        <select id="accontoCategoria" class="input-gestionale" style="margin-top:10px;">
+            <option value="">Categoria incasso (obbligatoria)</option>
+            <option value="Z10">Z10</option>
+            <option value="esente">Esente</option>
+            <option value="pos">POS</option>
+            <option value="contanti">Contanti</option>
+            <option value="bonifico">Bonifico</option>
+            <option value="bonus docenti">Bonus docenti</option>
+            <option value="klarna">Klarna</option>
+            <option value="compass">Compass</option>
+        </select>
+        
     <div class="preview-actions">
       <button id="btnConfermaAcconto">Conferma</button>
     </div>

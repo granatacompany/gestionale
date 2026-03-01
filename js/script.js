@@ -1,34 +1,37 @@
-// script.js svuotato
-// la logica è stata divisa in file dedicati:
-// - preventivi.js
-// - ordini.js
-// - riparazioni.js
+// script.js
 /* =========================================================
-   SIDEBAR - VOCE ATTIVA AUTOMATICA
+   AUTH GUARD + SIDEBAR ACTIVE
    ========================================================= */
 
+const AUTH_KEY = "spazioexe_auth";
+
+function paginaCorrente() {
+  const p = window.location.pathname.split("/").pop();
+  return p || "index.html";
+}
+
+function isLoggato() {
+  return sessionStorage.getItem(AUTH_KEY) === "1";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  const pagina = paginaCorrente();
 
-    /* recupera il nome della pagina corrente */
-    const paginaCorrente = window.location.pathname.split("/").pop();
+  // ✅ Guard: se non sei loggato, nessuna pagina interna è accessibile
+  if (pagina !== "index.html" && !isLoggato()) {
+    window.location.href = "index.html";
+    return;
+  }
 
-    /* recupera tutti i link della sidebar */
-    const linkSidebar = document.querySelectorAll(".sidebar a");
+  // ✅ Sidebar: voce attiva (solo se la sidebar esiste)
+  const linkSidebar = document.querySelectorAll(".sidebar a");
+  if (!linkSidebar.length) return;
 
-    linkSidebar.forEach(link => {
-
-        /* recupera il file collegato al link */
-        const href = link.getAttribute("href");
-
-        /* confronto diretto tra pagina aperta e link */
-        if (href === paginaCorrente) {
-            link.classList.add("active");
-        }
-
-    });
-
+  linkSidebar.forEach((link) => {
+    const href = link.getAttribute("href");
+    if (href === pagina) link.classList.add("active");
+  });
 });
-
 
 
 

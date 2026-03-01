@@ -1534,6 +1534,11 @@ function confermaAccontoPreventivo() {
 
     // 2) registra movimento in Vendite (ENTRATA) collegato al preventivo
     const vendite = JSON.parse(localStorage.getItem("vendite")) || [];
+    const cat = (document.getElementById("accontoCategoria")?.value || "").trim();
+        if (!cat) {
+        alert("Seleziona una categoria incasso (obbligatoria)");
+        return;
+        }
 
     vendite.push({
         id: "V-" + Date.now(),
@@ -1541,6 +1546,7 @@ function confermaAccontoPreventivo() {
         tipo: "entrata",
         clienteCodice: p.clienteCodice || "",
         descrizione: "Acconto preventivo",
+        categoria: cat,
         importo: Number(valore.toFixed(2)),
         preventivoId: p.id
     });

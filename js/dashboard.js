@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     caricaAndamentoEconomico();
     caricaStatoOperativo();
     caricaSuggerimenti();
+    initObiettiviServizi();
 });
 
 /* ================= KPI ================= */
@@ -68,7 +69,7 @@ function caricaAttivitaUrgenti() {
     riparazioni
         .filter(r => r.stato === "completata" && !r.incassata)
         .forEach(r => box.appendChild(rigaUrgente(
-            "Vendita da concludere", r.descrizione, "vendite.html", "b-green"
+            "Vendita da consegnare", r.descrizione, "vendite.html", "b-green"
         )));
 
     if (!box.children.length) {
@@ -159,4 +160,231 @@ function caricaSuggerimenti() {
         <div>📦 Verifica articoli sotto scorta</div>
         <div>💡 Clienti ricorrenti: valuta fidelizzazione</div>
     `;
+}
+
+/* ================= OBIETTIVI SERVIZI (Dashboard) ================= */
+
+const KEY_OBIETTIVI = "obiettiviGiornalieriServizi";
+let chartObiettivi = null;
+
+function oggiYMD() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+function caricaObiettivi() {
+    const salvati = JSON.parse(localStorage.getItem(KEY_OBIETTIVI)) || null;
+
+    // default “safe”
+    if (!salvati || !Array.isArray(salvati) || salvati.length === 0) {
+        const base = [
+            { label: "Luce", key: "luce", target: 0 },
+            { label: "Gas", key: "gas", target: 0 },
+            { label: "Fibra", key: "fibra", target: 0 },
+            { label: "Mobile", key: "mobile", target: 0 },
+        ];
+        localStorage.setItem(KEY_OBIETTIVI, JSON.stringify(base));
+        return base;
+    }
+
+    // normalizzo
+    return salvati.map(o => ({
+        label: String(o.label || "").trim() || "Obiettivo",
+        key: String(o.key || "").trim() || "",
+        target: Number(o.target || 0)
+    }));
+}
+
+function salvaObiettivi(obiettivi) {
+    localStorage.setItem(KEY_OBIETTIVI, JSON.stringify(obiettivi));
+}
+
+function caricaServizi() {
+    // la pagina servizi usa KEY_SERVIZI = "servizi"
+    return JSON.parse(localStorage.getItem("servizi")) || [];
+}
+
+function calcolaFattiOggi(obiettivi) {
+    const servizi = caricaServizi();
+    const oggi = oggiYMD();
+
+    // Conteggio “per tipo”: un cliente vale 1 se oggi ha quel flag true.
+    const fatti = {};
+    obiettivi.forEach(o => fatti[o.label] = 0);
+
+    servizi.forEach(rec => {
+        const data = (rec.dataAggiornamento || "").slice(0, 10);
+        if (data !== oggi) return;
+
+        obiettivi.forEach(o => {
+            // key (luce/gas/fibra/mobile) se esiste
+            if (o.key && rec[o.key] === true) {
+                fatti[o.label] = (fatti[o.label] || 0) + 1;
+            }
+        });
+    });
+
+    return fatti;
+}
+
+function initObiettiviServizi() {
+    const canvas = document.getElementById("chartObiettiviServizi");
+    const boxRiepilogo = document.getElementById("riepilogoObiettivi");
+    const btnModifica = document.getElementById("btnModificaObiettivi");
+
+    const modal = document.getElementById("modalObiettivi");
+    const rowsBox = document.getElementById("obiettiviRows");
+    const btnAdd = document.getElementById("btnAddObiettivo");
+    const btnAnnulla = document.getElementById("btnAnnullaObiettivi");
+    const btnSalva = document.getElementById("btnSalvaObiettivi");
+
+    if (!canvas || !boxRiepilogo || !btnModifica || !modal || !rowsBox || !btnAdd || !btnAnnulla || !btnSalva) return;
+
+    function renderDashboardObiettivi() {
+        const obiettivi = caricaObiettivi();
+        const fatti = calcolaFattiOggi(obiettivi);
+
+        const labels = obiettivi.map(o => o.label);
+        const targets = obiettivi.map(o => Number(o.target || 0));
+        const done = obiettivi.map(o => Number(fatti[o.label] || 0));
+
+        // riepilogo testuale
+        boxRiepilogo.innerHTML = "";
+        labels.forEach((lab, i) => {
+            const t = targets[i];
+            const d = done[i];
+            const ok = t > 0 && d >= t;
+
+            const div = document.createElement("div");
+            div.className = "row";
+            div.innerHTML = `
+                <span class="badge ${ok ? "b-green" : "b-amber"}">${lab}</span>
+                <span>Fatti oggi: <strong>${d}</strong> / Target: <strong>${t}</strong></span>
+            `;
+            boxRiepilogo.appendChild(div);
+        });
+
+        // chart
+        if (chartObiettivi) chartObiettivi.destroy();
+
+        chartObiettivi = new Chart(canvas, {
+            type: "bar",
+            data: {
+                labels,
+                datasets: [
+                    { label: "Target", data: targets },
+                    { label: "Fatti oggi", data: done }
+                ]
+            },
+            options: {
+                plugins: { legend: { display: true } },
+                responsive: true,
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+    }
+
+    function openModal() {
+        const obiettivi = caricaObiettivi();
+        rowsBox.innerHTML = "";
+        obiettivi.forEach((o, idx) => rowsBox.appendChild(creaRigaObiettivo(o, idx)));
+        modal.style.display = "flex";
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    function creaRigaObiettivo(o, idx) {
+        const wrap = document.createElement("div");
+        wrap.style.display = "grid";
+        wrap.style.gridTemplateColumns = "1.3fr 1fr 1fr";
+        wrap.style.gap = "10px";
+        wrap.style.alignItems = "center";
+
+        wrap.innerHTML = `
+            <input class="input-gestionale" placeholder="Nome (es. Fibra Fastweb)" value="${escapeHtml(o.label)}">
+            <select class="input-gestionale">
+                <option value="">Tipo (opz.)</option>
+                <option value="luce">Luce</option>
+                <option value="gas">Gas</option>
+                <option value="fibra">Fibra</option>
+                <option value="mobile">Mobile</option>
+            </select>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="number"
+                    class="input-gestionale"
+                    placeholder="Target"
+                    min="0"
+                    step="1"
+                    value="${Number(o.target || 0)}"
+                    style="width:100%; min-width:90px;">
+                <button type="button" class="toggle-rapido" title="Rimuovi">−</button>
+            </div>
+        `;
+
+        const select = wrap.querySelector("select");
+        if (select) select.value = o.key || "";
+
+        const btnRemove = wrap.querySelector("button");
+        btnRemove.onclick = () => wrap.remove();
+
+        return wrap;
+    }
+
+    function leggiObiettiviDalModal() {
+        const righe = Array.from(rowsBox.children);
+
+        const puliti = righe.map(r => {
+            const inputs = r.querySelectorAll("input");
+            const select = r.querySelector("select");
+
+            const label = (inputs[0]?.value || "").trim();
+            const target = Number(inputs[1]?.value || 0);
+            const key = (select?.value || "").trim();
+
+            return {
+                label: label || "Obiettivo",
+                key: key, // può essere vuota (obiettivo “custom”)
+                target: Number.isFinite(target) && target >= 0 ? Math.floor(target) : 0
+            };
+        });
+
+        // evita lista vuota
+        return puliti.length ? puliti : [
+            { label: "Luce", key: "luce", target: 0 },
+            { label: "Gas", key: "gas", target: 0 },
+            { label: "Fibra", key: "fibra", target: 0 },
+            { label: "Mobile", key: "mobile", target: 0 },
+        ];
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    // eventi
+    btnModifica.onclick = openModal;
+    btnAnnulla.onclick = () => { closeModal(); };
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    btnAdd.onclick = () => {
+        rowsBox.appendChild(creaRigaObiettivo({ label: "", key: "", target: 0 }, Date.now()));
+    };
+
+    btnSalva.onclick = () => {
+        const nuovi = leggiObiettiviDalModal();
+        salvaObiettivi(nuovi);
+        closeModal();
+        renderDashboardObiettivi();
+    };
+
+    // render iniziale
+    renderDashboardObiettivi();
 }

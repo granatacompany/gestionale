@@ -84,7 +84,7 @@ input:focus {
 /* ===== CONTENUTO PRINCIPALE ===== */
 .content {
     margin-left: 240px;                 /* sposta contenuto fuori dalla sidebar */
-    padding: 20px;                      /* spazio interno */
+    padding: 24px 28px;                     /* spazio interno */
 }
 
 /* ===== INPUT STANDARD GESTIONALE ===== */
@@ -894,4 +894,16 @@ canvas {
     font-size: 12px;
     padding: 6px 10px;
     border-radius: 8px;
+}
+
+h1 {
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
+.card h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6b7280;
 }
