@@ -7,8 +7,11 @@
   // Chiave sessione (in window per evitare "already declared")
   window.SPAZIOEXE_AUTH_KEY = window.SPAZIOEXE_AUTH_KEY || "spazioexe_auth";
 
-  // Password attuale (per ora lasciamo questa)
-  const PASSWORD = "Ismael1";
+// Password
+const PASSWORD_TITOLARE = "Ismael1";
+const PASSWORD_DIPENDENTE = "Tommy04"; // <-- cambiala come vuoi
+
+const ROLE_KEY = "spazioexe_ruolo";
 
   function setErrore(msg) {
     const errEl = document.getElementById("error");
@@ -22,11 +25,16 @@
 
     setErrore("");
 
-    if (pass === PASSWORD) {
-      // ✅ sessione attiva
+    if (pass === PASSWORD_TITOLARE) {
       sessionStorage.setItem(window.SPAZIOEXE_AUTH_KEY, "1");
+      sessionStorage.setItem(ROLE_KEY, "titolare");
+      window.location.href = "dashboard.html";
+      return;
+    }
 
-      // ✅ entro nell'app
+    if (pass === PASSWORD_DIPENDENTE) {
+      sessionStorage.setItem(window.SPAZIOEXE_AUTH_KEY, "1");
+      sessionStorage.setItem(ROLE_KEY, "dipendente");
       window.location.href = "dashboard.html";
       return;
     }

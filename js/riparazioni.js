@@ -109,17 +109,60 @@ function terminaRiparazione(id) {
     const r = riparazioni.find(r => r.id === id);
     if (!r) return;
 
+    // chiudo tempi
     if (r.startTime) {
         r.elapsedMs += Date.now() - r.startTime;
         r.startTime = null;
     }
 
+    // stato completata
     r.stato = "completata";
-    r.dataFine = new Date().toISOString().slice(0,10);
+    r.dataFine = new Date().toISOString().slice(0, 10);
 
     localStorage.setItem("riparazioni", JSON.stringify(riparazioni));
     renderRiparazioni();
+
+    // =========================
+    // WHATSAPP: messaggio ritiro
+    // =========================
+    const clienti = JSON.parse(localStorage.getItem("clienti")) || [];
+    const cliente = clienti.find(c => c.codice === r.clienteCodice);
+
+    if (!cliente || !cliente.telefono) return;
+
+    const nomeCliente = `${cliente.nome || ""} ${cliente.cognome || ""}`.trim() || "Cliente";
+
+    // normalizzo telefono (solo numeri)
+    let tel = String(cliente.telefono).replace(/\D/g, "");
+    if (!tel) return;
+
+    // Se non inizia con 39, lo prefisso (Italia)
+    if (!tel.startsWith("39")) tel = "39" + tel;
+
+    const testo = `
+Buongiorno ${nomeCliente},
+
+ti informiamo che il tuo dispositivo è pronto per il ritiro.
+
+L’intervento è stato completato e il dispositivo è stato testato.
+
+Puoi passare in negozio negli orari di apertura per il ritiro.
+
+Per qualsiasi informazione rimaniamo a disposizione.
+Grazie.
+`.trim();
+
+    window.open(`https://wa.me/${tel}?text=${encodeURIComponent(testo)}`, "_blank");
 }
+
+    r.stato = "completata";
+    
+    r.dataFine = new Date().toISOString().slice(0,10);
+    
+
+    localStorage.setItem("riparazioni", JSON.stringify(riparazioni));
+    renderRiparazioni();
+
 /* =========================================================
    TOGGLE RIPARAZIONI / STORICO
    ========================================================= */

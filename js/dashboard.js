@@ -1,7 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const ROLE_KEY = "spazioexe_ruolo";
+    const ruolo = sessionStorage.getItem(ROLE_KEY) || "titolare";
+    const isDipendente = ruolo === "dipendente";
+
+    // ✅ Dipendente: niente tasto "Modifica" obiettivi
+    if (isDipendente) {
+        const btn = document.getElementById("btnModificaObiettivi");
+        if (btn) btn.style.display = "none";
+    }
+
     calcolaKPI();
     caricaAttivitaUrgenti();
-    caricaAndamentoEconomico();
+
+    // ✅ Dipendente: niente "Andamento economico"
+    if (!isDipendente) {
+        caricaAndamentoEconomico();
+    } else {
+        const canvas = document.getElementById("chartIncassi");
+        const card = canvas?.closest(".card");
+        if (card) card.style.display = "none";
+    }
+
     caricaStatoOperativo();
     caricaSuggerimenti();
     initObiettiviServizi();
@@ -16,17 +35,15 @@ function calcolaKPI() {
 
     const oggi = new Date();
 
-    const incassoMese = vendite
+    const oggiISO = new Date().toISOString().slice(0, 10);
+
+        const incassoOggi = vendite
         .filter(v => v.tipo === "entrata")
-        .filter(v => {
-            const d = new Date(v.data);
-            return d.getMonth() === oggi.getMonth() &&
-                   d.getFullYear() === oggi.getFullYear();
-        })
+        .filter(v => v.data === oggiISO)
         .reduce((s, v) => s + Number(v.importo || 0), 0);
 
-    document.getElementById("kpiIncassoMese").innerText =
-        "€ " + incassoMese.toFixed(2);
+    document.getElementById("kpiIncassoOggi").innerText =
+    "€ " + incassoOggi.toFixed(2);
 
     document.getElementById("kpiPreventiviAperti").innerText =
         preventivi.filter(p => !p.accettato && !p.rifiutato).length;
@@ -72,9 +89,13 @@ function caricaAttivitaUrgenti() {
             "Vendita da consegnare", r.descrizione, "vendite.html", "b-green"
         )));
 
+        
+
     if (!box.children.length) {
         box.innerHTML = "<div class='muted'>Nessuna urgenza 🎉</div>";
     }
+
+
 }
 
 function rigaUrgente(testo, desc, link, badge) {

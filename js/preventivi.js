@@ -1149,11 +1149,29 @@ function inviaWhatsappPreventivoDaPreview() {
         telefono = "39" + telefono;
     }
 
-    const messaggio = encodeURIComponent(
-        `Preventivo ${p.id}\n` +
-        `${p.descrizione || ""}\n` +
-        `Totale: € ${p.totale.toFixed(2)}`
-    );
+    const nomeCliente = `${cliente.nome || ""} ${cliente.cognome || ""}`.trim() || "Cliente";
+    const descr = (p.descrizione || "").trim();
+    const tempo = Number(p.tempoStimato || 0);
+
+    const testo = `
+Buongiorno ${nomeCliente},
+abbiamo analizzato il tuo dispositivo e ti confermo quanto segue:
+
+• Intervento necessario: ${descr || "—"}
+• Costo totale: € ${Number(p.totale || 0).toFixed(2)}
+• Tempistiche: circa ${tempo} minuti
+
+Utilizziamo ricambi di qualità e l’intervento include test completo finale prima della consegna.
+
+• Possiamo riservarti uno slot in laboratorio e procedere immediatamente alla lavorazione.
+
+Il prezzo non subirà variazioni senza tuo consenso.
+
+Rimango a disposizione per qualsiasi chiarimento.
+Attendo conferma per bloccare la prenotazione e iniziare l’intervento.
+`.trim();
+
+const messaggio = encodeURIComponent(testo);
 
     const url = `https://wa.me/${telefono}?text=${messaggio}`;
     window.open(url, "_blank");

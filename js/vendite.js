@@ -687,6 +687,25 @@ document.addEventListener("DOMContentLoaded", () => {
     viewAperte.style.display = "block";
     viewStorico.style.display = "none";
 
+        const ROLE_KEY = "spazioexe_ruolo";
+        const ruolo = sessionStorage.getItem(ROLE_KEY) || "titolare";
+        const isDipendente = ruolo === "dipendente";
+
+        if (isDipendente) {
+            // Nascondo il tab storico
+            btnStorico.style.display = "none";
+
+            // Forzo sempre la vista "vendite da concludere"
+            btnAperte.classList.add("attivo");
+            viewAperte.style.display = "block";
+            viewStorico.style.display = "none";
+
+            const filtri = document.getElementById("filtriStoricoVendite");
+            if (filtri) filtri.style.display = "none";
+
+            return; // importantissimo: evita di attaccare onclick allo storico
+        }
+
     btnAperte.onclick = () => {
         btnAperte.classList.add("attivo");
         btnStorico.classList.remove("attivo");
