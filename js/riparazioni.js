@@ -153,7 +153,6 @@ Grazie.
 `.trim();
 
     window.open(`https://wa.me/${tel}?text=${encodeURIComponent(testo)}`, "_blank");
-}
 
     r.stato = "completata";
     
@@ -162,6 +161,9 @@ Grazie.
 
     localStorage.setItem("riparazioni", JSON.stringify(riparazioni));
     renderRiparazioni();
+}
+
+    
 
 /* =========================================================
    TOGGLE RIPARAZIONI / STORICO

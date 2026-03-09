@@ -1,49 +1,67 @@
 /* =========================================================
-   LOGIN (robusto, senza conflitti globali)
+   LOGIN via Supabase Auth
    File: js/login.js
    ========================================================= */
 
 (() => {
-  // Chiave sessione (in window per evitare "already declared")
-  window.SPAZIOEXE_AUTH_KEY = window.SPAZIOEXE_AUTH_KEY || "spazioexe_auth";
+  const AUTH_KEY = "spazioexe_auth";
+  const ROLE_KEY = "spazioexe_ruolo";
 
-// Password
-const PASSWORD_TITOLARE = "Ismael1";
-const PASSWORD_DIPENDENTE = "Tommy04"; // <-- cambiala come vuoi
+  // 🔧 INCOLLA QUI I TUOI DATI SUPABASE
+  const SUPABASE_URL = "https://ncvtjvsqnedpisnnflod.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_QhkbuhieU8AdHbAeIR1p1g_lBS3G_EM";
 
-const ROLE_KEY = "spazioexe_ruolo";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Mappa password -> utente (2 ruoli)
+  // Puoi cambiare le password mantenendo queste email “tecniche”
+  const UTENTE_TITOLARE = "titolare@spazioexe.local";
+  const UTENTE_DIPENDENTE = "dipendente@spazioexe.local";
+
+  // Se vuoi: usa le stesse password che avevi già
+  const PASSWORD_TITOLARE = "Ismael1";
+  const PASSWORD_DIPENDENTE = "Tommy04";
 
   function setErrore(msg) {
     const errEl = document.getElementById("error");
     if (errEl) errEl.innerText = msg || "";
   }
 
-  // Espongo login in globale perché index.html usa onclick="login()"
-  window.login = function () {
+  async function provaLogin(email, password, ruolo) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { ok: false, msg: error.message };
+
+    // ok: salvo “guard locale” + ruolo
+    sessionStorage.setItem(AUTH_KEY, "1");
+    sessionStorage.setItem(ROLE_KEY, ruolo);
+
+    return { ok: true };
+  }
+
+  window.login = async function () {
     const passEl = document.getElementById("pass");
     const pass = (passEl?.value || "").trim();
 
     setErrore("");
 
+    // 1) prova titolare
     if (pass === PASSWORD_TITOLARE) {
-      sessionStorage.setItem(window.SPAZIOEXE_AUTH_KEY, "1");
-      sessionStorage.setItem(ROLE_KEY, "titolare");
-      window.location.href = "dashboard.html";
-      return;
+      const res = await provaLogin(UTENTE_TITOLARE, pass, "titolare");
+      if (res.ok) { window.location.href = "dashboard.html"; return; }
+      setErrore(res.msg); return;
     }
 
+    // 2) prova dipendente
     if (pass === PASSWORD_DIPENDENTE) {
-      sessionStorage.setItem(window.SPAZIOEXE_AUTH_KEY, "1");
-      sessionStorage.setItem(ROLE_KEY, "dipendente");
-      window.location.href = "dashboard.html";
-      return;
+      const res = await provaLogin(UTENTE_DIPENDENTE, pass, "dipendente");
+      if (res.ok) { window.location.href = "dashboard.html"; return; }
+      setErrore(res.msg); return;
     }
 
     setErrore("Credenziali errate!");
     passEl?.focus();
   };
 
-  // UX: invio e pulizia messaggi
   document.addEventListener("DOMContentLoaded", () => {
     const passEl = document.getElementById("pass");
     if (!passEl) return;
