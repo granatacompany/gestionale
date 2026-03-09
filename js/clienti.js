@@ -104,8 +104,18 @@ function nextField(event, nextId) {
 }
 
 function salvaCliente() {
+
+    // controllo GDPR
+        const gdpr = document.getElementById("gdprCheck").checked;
+
+        if (!gdpr) {
+            alert("Per registrare il cliente è necessario confermare la presa visione dell'informativa GDPR.");
+            return;
+        }
+
     if (rigaSelezionata === null) registraCliente();
     else modificaCliente();
+    document.getElementById("gdprCheck").checked = false;
 }
 
 function registraCliente() {

@@ -1095,41 +1095,342 @@ function getClienteByCodice(codice) {
     const clienti = JSON.parse(localStorage.getItem("clienti")) || [];
     return clienti.find(c => c.codice === codice);
 }
-function stampaPreventivoDaPreview() {
+function escapeHtmlStampa(str) {
+    return String(str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
 
-    const p = getPreventivoById(previewPreventivoId);
-    if (!p) return;
+function formattaDataIt(dataIso) {
+    if (!dataIso) return "-";
+    const d = new Date(dataIso);
+    if (Number.isNaN(d.getTime())) return dataIso;
+    return d.toLocaleDateString("it-IT");
+}
 
-    const cliente = getClienteByCodice(p.clienteCodice);
+function getNomeCliente(cliente, fallbackCodice = "") {
+    if (!cliente) return fallbackCodice || "-";
+    return `${cliente.nome || ""} ${cliente.cognome || ""}`.trim() || fallbackCodice || "-";
+}
 
+function getIndirizzoCliente(cliente) {
+    if (!cliente) return "-";
+
+    const parti = [
+        cliente.indirizzo || "",
+        cliente.citta || ""
+    ].map(v => String(v).trim()).filter(Boolean);
+
+    return parti.length ? parti.join(" - ") : "-";
+}
+
+function getLogoStampaSrc() {
+    return "assets/logo-spazioexe.png";
+}
+
+function apriFinestraStampaDocumento(titolo, contenutoBody) {
     const w = window.open("", "_blank");
+    if (!w) {
+        alert("Popup bloccato dal browser. Consenti le finestre popup per stampare.");
+        return;
+    }
+
     w.document.write(`
         <html>
         <head>
-            <title>Preventivo ${p.id}</title>
+            <title>${escapeHtmlStampa(titolo)}</title>
+            <meta charset="UTF-8">
             <style>
-                body { font-family: Arial; padding: 20px; }
+                @page {
+                    size: A5 portrait;
+                    margin: 10mm;
+                }
+
+                * {
+                    box-sizing: border-box;
+                }
+
+                html, body {
+                    margin: 0;
+                    padding: 0;
+                    font-family: Arial, sans-serif;
+                    color: #111;
+                    background: #fff;
+                }
+
+                body {
+                    padding: 0;
+                }
+
+                .sheet {
+                    width: 100%;
+                    min-height: 100%;
+                }
+
+                .header {
+                    text-align: center;
+                    margin-bottom: 10px;
+                }
+
+                .logo {
+                    max-width: 190px;
+                    max-height: 60px;
+                    object-fit: contain;
+                    margin-bottom: 8px;
+                }
+
+                .doc-title {
+                    font-size: 18px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                    margin: 0;
+                }
+
+                .doc-subtitle {
+                    font-size: 12px;
+                    color: #444;
+                    margin-top: 3px;
+                }
+
+                .box {
+                    border: 1px solid #111;
+                    padding: 8px 10px;
+                    margin-bottom: 10px;
+                }
+
+                .box-title {
+                    font-size: 12px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    margin-bottom: 6px;
+                }
+
+                .grid-2 {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 8px 14px;
+                }
+
+                .row {
+                    margin-bottom: 4px;
+                    line-height: 1.35;
+                    font-size: 12px;
+                }
+
+                .label {
+                    font-weight: 700;
+                }
+
+                .big-total {
+                    font-size: 20px;
+                    font-weight: 700;
+                }
+
+                .note {
+                    font-size: 11px;
+                    line-height: 1.45;
+                    text-align: justify;
+                }
+
+                .firma-wrap {
+                    margin-top: 22px;
+                    display: flex;
+                    justify-content: flex-end;
+                }
+
+                .firma-box {
+                    width: 210px;
+                    text-align: center;
+                    font-size: 12px;
+                }
+
+                .firma-line {
+                    border-bottom: 1px solid #111;
+                    height: 34px;
+                    margin-top: 24px;
+                }
+
+                .muted {
+                    color: #444;
+                }
+
+                .spacer-8 {
+                    height: 8px;
+                }
+
+                .spacer-12 {
+                    height: 12px;
+                }
             </style>
         </head>
         <body>
-            <h2>Preventivo ${p.id}</h2>
-            <p><strong>Data:</strong> ${p.data}</p>
-            <p><strong>Cliente:</strong> ${cliente ? cliente.nome + " " + cliente.cognome : p.clienteCodice}</p>
-
-            <p><strong>Descrizione intervento:</strong></p>
-            <p>${(p.descrizione || "").replaceAll("\n","<br>")}</p>
-
-            <h3>Totale: € ${p.totale.toFixed(2)}</h3>
+            ${contenutoBody}
+            <script>
+                window.onload = function () {
+                    setTimeout(function () {
+                        window.print();
+                    }, 250);
+                };
+            </script>
         </body>
         </html>
     `);
 
     w.document.close();
-    w.print();
+}
 
+function stampaPreventivoDaPreview() {
+    const p = getPreventivoById(previewPreventivoId);
+    if (!p) return;
+
+    const cliente = getClienteByCodice(p.clienteCodice);
+
+    const nomeCliente = getNomeCliente(cliente, p.clienteCodice);
+    const telefono = cliente?.telefono || "-";
+    const indirizzo = getIndirizzoCliente(cliente);
+    const logoSrc = getLogoStampaSrc();
+    const tempoStimato = Number(p.tempoStimato || 0);
+
+    const html = `
+        <div class="sheet">
+            <div class="header">
+                <img
+                    src="${logoSrc}"
+                    alt="Logo SpazioExe"
+                    class="logo"
+                    onerror="this.style.display='none'"
+                >
+                <p class="doc-title">ACCETTAZIONE PREVENTIVO</p>
+                <div class="doc-subtitle">Scheda cliente da firmare per approvazione intervento</div>
+            </div>
+
+            <div class="box">
+                <div class="grid-2">
+                    <div class="row"><span class="label">Numero pratica:</span> ${escapeHtmlStampa(p.id)}</div>
+                    <div class="row"><span class="label">Data:</span> ${escapeHtmlStampa(formattaDataIt(p.data))}</div>
+                    <div class="row"><span class="label">Cliente:</span> ${escapeHtmlStampa(nomeCliente)}</div>
+                    <div class="row"><span class="label">Telefono:</span> ${escapeHtmlStampa(telefono)}</div>
+                </div>
+                <div class="row" style="margin-top:6px;"><span class="label">Indirizzo:</span> ${escapeHtmlStampa(indirizzo)}</div>
+            </div>
+
+            <div class="box">
+                <div class="box-title">Intervento / dispositivo</div>
+                <div class="row">${escapeHtmlStampa(p.descrizione || "-").replaceAll("\\n", "<br>")}</div>
+            </div>
+
+            <div class="box">
+                <div class="grid-2">
+                    <div class="row">
+                        <span class="label">Totale preventivo:</span><br>
+                        <span class="big-total">€ ${Number(p.totale || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="row">
+                        <span class="label">Tempo stimato:</span><br>
+                        ${tempoStimato > 0 ? `${tempoStimato} minuti` : "Da definire"}
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <div class="box-title">Note e condizioni</div>
+                <div class="note">
+                    Il cliente autorizza la presa in carico del dispositivo e l’esecuzione
+                    delle verifiche tecniche necessarie. Eventuali variazioni di prezzo o
+                    lavorazioni aggiuntive non previste nel presente preventivo verranno
+                    comunicate prima di procedere. Il centro assistenza non è responsabile
+                    per eventuali perdite di dati presenti sul dispositivo: il cliente è
+                    tenuto, quando possibile, ad effettuare un backup preventivo.
+                </div>
+            </div>
+
+            <div class="firma-wrap">
+                <div class="firma-box">
+                    Firma cliente per accettazione
+                    <div class="firma-line"></div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    apriFinestraStampaDocumento(`Preventivo ${p.id}`, html);
     chiudiPreviewPreventivo();
 }
 
+function stampaSchedaRitiroDaAccettazione(p) {
+    if (!p) return;
+
+    const cliente = getClienteByCodice(p.clienteCodice);
+
+    const nomeCliente = getNomeCliente(cliente, p.clienteCodice);
+    const telefono = cliente?.telefono || "-";
+    const indirizzo = getIndirizzoCliente(cliente);
+    const logoSrc = getLogoStampaSrc();
+
+    const acconto = Number(p.acconto || 0);
+    const totale = Number(p.totale || 0);
+    const saldo = Math.max(0, totale - acconto);
+
+    const html = `
+        <div class="sheet">
+            <div class="header">
+                <img
+                    src="${logoSrc}"
+                    alt="Logo SpazioExe"
+                    class="logo"
+                    onerror="this.style.display='none'"
+                >
+                <p class="doc-title">SCHEDA RITIRO DISPOSITIVO</p>
+                <div class="doc-subtitle">Documento da firmare dal cliente al momento della consegna</div>
+            </div>
+
+            <div class="box">
+                <div class="grid-2">
+                    <div class="row"><span class="label">Numero pratica:</span> ${escapeHtmlStampa(p.id)}</div>
+                    <div class="row"><span class="label">Data accettazione:</span> ${escapeHtmlStampa(formattaDataIt(p.dataAccettazione || p.data))}</div>
+                    <div class="row"><span class="label">Cliente:</span> ${escapeHtmlStampa(nomeCliente)}</div>
+                    <div class="row"><span class="label">Telefono:</span> ${escapeHtmlStampa(telefono)}</div>
+                </div>
+                <div class="row" style="margin-top:6px;"><span class="label">Indirizzo:</span> ${escapeHtmlStampa(indirizzo)}</div>
+            </div>
+
+            <div class="box">
+                <div class="box-title">Lavoro eseguito / dispositivo</div>
+                <div class="row">${escapeHtmlStampa(p.descrizione || "-").replaceAll("\\n", "<br>")}</div>
+            </div>
+
+            <div class="box">
+                <div class="grid-2">
+                    <div class="row"><span class="label">Totale intervento:</span> € ${totale.toFixed(2)}</div>
+                    <div class="row"><span class="label">Acconto versato:</span> € ${acconto.toFixed(2)}</div>
+                    <div class="row"><span class="label">Saldo al ritiro:</span> € ${saldo.toFixed(2)}</div>
+                    <div class="row"><span class="label">Stato pratica:</span> In attesa ritiro cliente</div>
+                </div>
+            </div>
+
+            <div class="box">
+                <div class="box-title">Dichiarazione ritiro</div>
+                <div class="note">
+                    Dichiaro di aver ritirato il dispositivo relativo alla pratica sopra indicata.
+                    Confermo inoltre di aver ricevuto il prodotto e di aver preso visione
+                    dell’intervento effettuato.
+                </div>
+            </div>
+
+            <div class="firma-wrap">
+                <div class="firma-box">
+                    Firma cliente al ritiro
+                    <div class="firma-line"></div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    apriFinestraStampaDocumento(`Scheda ritiro ${p.id}`, html);
+}
 /* =========================================================
    PREVIEW PREVENTIVO manda su wathsapp
    ========================================================= */
@@ -1575,10 +1876,13 @@ function confermaAccontoPreventivo() {
     creaRiparazioneDaPreventivo(p);
     creaOrdiniDaPreventivo(p);
 
-    // 4) chiudi modal
+        // 4) chiudi modal
     document.getElementById("modalAcconto").style.display = "none";
-    preventivoAccontoId = null;
 
+    // 5) stampa scheda ritiro da conservare con la pratica
+    stampaSchedaRitiroDaAccettazione(p);
+
+    preventivoAccontoId = null;
     renderPreventivi();
 }
 

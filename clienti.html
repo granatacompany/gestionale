@@ -54,6 +54,14 @@
             onkeydown="nextField(event, 'btnCliente')"
         ></textarea>
 
+        <!-- GDPR -->
+        <div style="grid-column:1/-1; font-size:14px; display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="gdprCheck">
+            <label for="gdprCheck">
+                Dichiaro di aver preso visione dell'informativa sul trattamento dei dati personali (GDPR)
+            </label>
+        </div>
+
         <button id="btnCliente" onclick="salvaCliente()">Registra cliente</button>
         <button id="btnElimina" onclick="eliminaCliente()" style="display:none;">Elimina cliente</button>
         <button id="btnStampa" onclick="stampaTessera()" style="display:none;">Stampa tessera</button>
