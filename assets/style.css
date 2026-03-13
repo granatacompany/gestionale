@@ -907,3 +907,27 @@ h1 {
     letter-spacing: 0.04em;
     color: #6b7280;
 }
+
+/* ============================
+   PREVENTIVI - TOTALE + IVA
+============================ */
+
+.totale-wrapper{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    max-width:420px;
+}
+
+.checkbox-iva{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:14px;
+    color:#444;
+    cursor:pointer;
+}
+
+.checkbox-iva input{
+    cursor:pointer;
+}

@@ -41,6 +41,9 @@ function resetFormPreventivo() {
     prevSconto.value = "";
     prevTotale.value = "";
 
+    const chkEscludiIva = document.getElementById("prevEscludiIva");
+    if (chkEscludiIva) chkEscludiIva.checked = false;
+
     /* ---------------------------
        FOCUS INIZIALE
        --------------------------- */
@@ -277,6 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* =========================================================
    PREVENTIVI - TOTALE AUTOMATICO CON BLOCCO CAMPO
+   + CHECKBOX ESCLUDI IVA
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -284,6 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totaleInput = document.getElementById("prevTotale");
     const manodoperaInput = document.getElementById("prevManodopera");
     const scontoInput = document.getElementById("prevSconto");
+    const chkEscludiIva = document.getElementById("prevEscludiIva");
     const btnRapido = document.getElementById("btnRapido");
     const ricambiWrapper = document.getElementById("ricambiWrapper");
 
@@ -291,62 +296,62 @@ document.addEventListener("DOMContentLoaded", () => {
         !totaleInput ||
         !manodoperaInput ||
         !scontoInput ||
+        !chkEscludiIva ||
         !btnRapido ||
         !ricambiWrapper
     ) return;
 
-    // verifica modalità preventivo rapido
     function isPreventivoRapido() {
         return btnRapido.classList.contains("attivo");
     }
 
-    // gestisce lock/unlock del totale
+    function calcolaTotale() {
+        // se è preventivo rapido, il totale lo decide l’operatore
+        if (isPreventivoRapido()) return;
+
+        let imponibile = 0;
+
+        /* somma prezzi ricambi */
+        ricambiWrapper.querySelectorAll(".riga-ricambio").forEach(riga => {
+            const prezzo = Number(riga.querySelectorAll("input")[2].value) || 0;
+            imponibile += prezzo;
+        });
+
+        /* aggiunge manodopera */
+        imponibile += Number(manodoperaInput.value) || 0;
+
+        if (imponibile < 0) imponibile = 0;
+
+        const escludiIva = chkEscludiIva.checked;
+        const totaleBase = escludiIva ? imponibile : (imponibile * 1.22);
+
+        /* sconto applicato sul totale finale visualizzato */
+        const sconto = Number(scontoInput.value) || 0;
+
+        let totaleFinale = totaleBase - sconto;
+        if (totaleFinale < 0) totaleFinale = 0;
+
+        totaleInput.value = totaleFinale.toFixed(2);
+    }
+
     function aggiornaStatoTotale() {
         if (isPreventivoRapido()) {
             totaleInput.readOnly = false;
             totaleInput.classList.remove("readonly");
+
+            // in rapido la checkbox non ha senso operativo
+            chkEscludiIva.disabled = true;
         } else {
             totaleInput.readOnly = true;
             totaleInput.classList.add("readonly");
-            calcolaTotale(); // forza ricalcolo
+            chkEscludiIva.disabled = false;
+            calcolaTotale();
         }
     }
 
-    // calcolo totale
-function calcolaTotale() {
-
-    // se è preventivo rapido, il totale lo decide l’operatore
-    if (isPreventivoRapido()) return;
-
-    let imponibile = 0;
-
-    /* somma prezzi ricambi */
-    ricambiWrapper.querySelectorAll(".riga-ricambio").forEach(riga => {
-        const prezzo = Number(riga.querySelectorAll("input")[2].value) || 0;
-        imponibile += prezzo;
-    });
-
-    /* aggiunge manodopera */
-    imponibile += Number(manodoperaInput.value) || 0;
-
-    if (imponibile < 0) imponibile = 0;
-
-    /* IVA 22% */
-    const totaleIvato = imponibile * 1.22;
-
-    /* SCONTO applicato DOPO l’IVA */
-    const sconto = Number(scontoInput.value) || 0;
-
-    let totaleFinale = totaleIvato - sconto;
-
-    if (totaleFinale < 0) totaleFinale = 0;
-
-    totaleInput.value = totaleFinale.toFixed(2);
-}
-
-    // EVENTI
     manodoperaInput.addEventListener("input", calcolaTotale);
     scontoInput.addEventListener("input", calcolaTotale);
+    chkEscludiIva.addEventListener("change", calcolaTotale);
 
     ricambiWrapper.addEventListener("input", (e) => {
         if (e.target.type === "number") {
@@ -354,12 +359,9 @@ function calcolaTotale() {
         }
     });
 
-    // quando clicchi il toggle rapido
     btnRapido.addEventListener("click", aggiornaStatoTotale);
 
-    // stato iniziale
     aggiornaStatoTotale();
-
 });
 
 
@@ -681,6 +683,7 @@ function salvaPreventivo() {
         sconto: sconto,
         totale: totale,
         tempoStimato: tempoStimato,
+        escludiIva: document.getElementById("prevEscludiIva")?.checked || false,
         accettato: false
     };
 
@@ -768,6 +771,7 @@ p.ricambi = ricambi;
     p.sconto = Number(prevSconto.value) || 0;
     p.totale = Number(prevTotale.value) || 0;
     p.tempoStimato = Number(prevTempoStimato.value) || 0;
+    p.escludiIva = document.getElementById("prevEscludiIva")?.checked || false;
 
     /* =========================
        SALVATAGGIO
@@ -1651,6 +1655,7 @@ function caricaPreventivoPerDuplicazione(idPreventivo) {
     document.getElementById("prevManodopera").value = p.manodopera || "";
     document.getElementById("prevSconto").value = p.sconto || "";
     document.getElementById("prevTotale").value = p.totale || "";
+    document.getElementById("prevEscludiIva").checked = Boolean(p.escludiIva);
 
     /* =========================
        TEMPO STIMATO
@@ -1746,6 +1751,7 @@ function caricaPreventivoPerModifica(idPreventivo) {
     document.getElementById("prevManodopera").value = p.manodopera || "";
     document.getElementById("prevSconto").value = p.sconto || "";
     document.getElementById("prevTotale").value = p.totale || "";
+    document.getElementById("prevEscludiIva").checked = Boolean(p.escludiIva);
 
     /* =========================
        TEMPO STIMATO
